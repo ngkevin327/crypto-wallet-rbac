@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Prisma
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# Planning artifacts (not part of this repository)
+/1.txt
+/2.txt
+/docs/01-Product-Vision-Document.md
+/docs/02-Product-Requirements-Document.md
+/docs/03-Technical-Architecture-Addendum.md
+/docs/04-Supporting-Diagrams.md
+/docs/05-MVP-Implementation-Plan.md

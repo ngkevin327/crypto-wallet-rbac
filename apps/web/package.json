@@ -1,0 +1,12 @@
+{
+  "name": "@wtp/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"web build pending\"",
+    "dev": "echo \"Web dev server starts in a later commit\"",
+    "lint": "echo \"lint pending\"",
+    "typecheck": "echo \"typecheck pending\"",
+    "test": "echo \"tests pending\""
+  }
+}

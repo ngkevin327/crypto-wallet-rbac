@@ -1,0 +1,12 @@
+{
+  "name": "@wtp/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "echo \"API dev server starts in a later commit\"",
+    "lint": "echo \"lint pending\"",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"tests pending\""
+  }
+}
