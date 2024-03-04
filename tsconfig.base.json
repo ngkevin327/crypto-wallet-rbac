@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@wtp/shared": ["./packages/shared/src/index.ts"],
+      "@wtp/shared/*": ["./packages/shared/src/*"],
+      "@wtp/policy-engine": ["./packages/policy-engine/src/index.ts"],
+      "@wtp/policy-engine/*": ["./packages/policy-engine/src/*"]
+    }
+  }
+}
