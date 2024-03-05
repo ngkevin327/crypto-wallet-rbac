@@ -1,0 +1,11 @@
+# Copy to docker-compose.override.yml for local port overrides (optional).
+# docker-compose.override.yml is gitignored if you add it locally.
+
+services:
+  postgres:
+    ports:
+      - "5433:5432"
+
+  redis:
+    ports:
+      - "6380:6379"

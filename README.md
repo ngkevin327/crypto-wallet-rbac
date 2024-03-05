@@ -25,12 +25,21 @@ The API is a modular monolith: domain modules for auth, organizations, wallets, 
 
 ## Local development
 
+Start infrastructure:
+
+```bash
+docker compose up -d
+```
+
+Then install and run apps:
+
 ```bash
 pnpm install
-pnpm db:up          # start Postgres + Redis
-pnpm db:wait        # wait for Postgres
+pnpm db:wait        # wait for Postgres (after compose is up)
 pnpm dev            # API :3001, web :3000
 ```
+
+Or use `pnpm db:up` as an alias for `docker compose up -d`.
 
 Copy environment templates:
 
