@@ -41,6 +41,12 @@ pnpm dev            # API :3001, web :3000
 
 Or use `pnpm db:up` as an alias for `docker compose up -d`.
 
+| Script | Description |
+|--------|-------------|
+| `pnpm db:up` | Start Postgres and Redis containers |
+| `pnpm db:down` | Stop containers |
+| `pnpm db:wait` | Block until Postgres accepts connections |
+
 Copy environment templates:
 
 ```bash
