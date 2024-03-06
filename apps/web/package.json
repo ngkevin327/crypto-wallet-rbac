@@ -5,7 +5,7 @@
   "scripts": {
     "build": "echo \"web build pending\"",
     "dev": "echo \"Web dev server starts in a later commit\"",
-    "lint": "echo \"lint pending\"",
+    "lint": "echo \"web lint starts with Next.js setup\"",
     "typecheck": "echo \"typecheck pending\"",
     "test": "echo \"tests pending\""
   }

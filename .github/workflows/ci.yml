@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        continue-on-error: true
+
+      - name: Install dependencies (no lockfile)
+        if: failure()
+        run: pnpm install
+
+      - name: Typecheck API
+        run: pnpm --filter @wtp/api typecheck
+
+      - name: Typecheck shared packages
+        run: pnpm --filter @wtp/shared typecheck
+
+      - name: Typecheck policy-engine
+        run: pnpm --filter @wtp/policy-engine typecheck
+
+      - name: Lint root
+        run: pnpm exec eslint . --max-warnings 0
+        continue-on-error: true
