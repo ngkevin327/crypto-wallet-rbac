@@ -4,10 +4,11 @@ import { AppConfigModule } from "./config/config.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
+import { HealthModule } from "./health/health.module";
 import { AppLoggerModule } from "./logger/logger.module";
 
 @Module({
-  imports: [AppConfigModule, AppLoggerModule],
+  imports: [AppConfigModule, AppLoggerModule, HealthModule],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLoggingInterceptor },
