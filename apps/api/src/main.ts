@@ -1,5 +1,6 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import cookieParser from "cookie-parser";
 import { defaultValidationPipeOptions } from "./common/pipes/validation-options";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "nestjs-pino";
@@ -9,6 +10,7 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe(defaultValidationPipeOptions));
+  app.use(cookieParser());
 
   const config = app.get(ConfigService);
   const port = config.get<number>("port") ?? 3001;
