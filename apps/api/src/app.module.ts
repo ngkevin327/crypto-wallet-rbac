@@ -6,11 +6,19 @@ import { RequestLoggingInterceptor } from "./common/interceptors/request-logging
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
 import { AuthModule } from "./auth/auth.module";
 import { DatabaseModule } from "./database/database.module";
+import { RedisModule } from "./redis/redis.module";
 import { HealthModule } from "./health/health.module";
 import { AppLoggerModule } from "./logger/logger.module";
 
 @Module({
-  imports: [AppConfigModule, AppLoggerModule, DatabaseModule, HealthModule, AuthModule],
+  imports: [
+    AppConfigModule,
+    AppLoggerModule,
+    DatabaseModule,
+    RedisModule,
+    HealthModule,
+    AuthModule,
+  ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: RequestLoggingInterceptor },

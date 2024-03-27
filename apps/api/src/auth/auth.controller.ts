@@ -13,6 +13,7 @@ import { AuthService } from "./auth.service";
 import { CurrentUser, type RequestUser } from "./decorators/current-user.decorator";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
+import { AuthRateLimitGuard } from "./guards/auth-rate-limit.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
 const REFRESH_COOKIE = "wtp_refresh";
@@ -22,6 +23,7 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Post("register")
+  @UseGuards(AuthRateLimitGuard)
   async register(
     @Body() dto: RegisterDto,
     @Res({ passthrough: true }) res: Response
@@ -33,6 +35,7 @@ export class AuthController {
 
   @Post("login")
   @HttpCode(200)
+  @UseGuards(AuthRateLimitGuard)
   async login(
     @Body() dto: LoginDto,
     @Req() req: Request,
