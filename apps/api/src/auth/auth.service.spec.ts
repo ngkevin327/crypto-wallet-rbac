@@ -23,12 +23,14 @@ describe("AuthService login", () => {
   const passwords = new PasswordService();
   const jwt = new JwtService({ secret: "test-secret-at-least-16" });
   const config = { get: jest.fn().mockReturnValue("24h") } as unknown as ConfigService;
+  const mockMfa = { verifyCode: jest.fn() };
   const service = new AuthService(
     mockUsers as never,
     passwords,
     jwt,
     mockPrisma as never,
-    config
+    config,
+    mockMfa as never
   );
 
   beforeEach(() => {
@@ -62,12 +64,14 @@ describe("AuthService register", () => {
     const jwt = new JwtService({ secret: "test-secret-at-least-16" });
     const config = { get: jest.fn() } as unknown as ConfigService;
     mockUsers.findByEmail.mockResolvedValue({ id: "x" });
+    const mockMfa = { verifyCode: jest.fn() };
     const service = new AuthService(
       mockUsers as never,
       passwords,
       jwt,
       mockPrisma as never,
-      config
+      config,
+      mockMfa as never
     );
     await expect(service.register("a@b.com", "pass")).rejects.toBeInstanceOf(
       ConflictException
