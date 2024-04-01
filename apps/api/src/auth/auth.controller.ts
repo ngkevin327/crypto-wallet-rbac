@@ -12,7 +12,10 @@ import type { Request, Response } from "express";
 import { AuthService } from "./auth.service";
 import { CurrentUser, type RequestUser } from "./decorators/current-user.decorator";
 import { LoginDto } from "./dto/login.dto";
+import { MfaEnableDto } from "./dto/mfa-enable.dto";
+import { MfaVerifyLoginDto } from "./dto/mfa-verify-login.dto";
 import { RegisterDto } from "./dto/register.dto";
+import { MfaService } from "./mfa.service";
 import { AuthRateLimitGuard } from "./guards/auth-rate-limit.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 
@@ -20,7 +23,10 @@ const REFRESH_COOKIE = "wtp_refresh";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly mfa: MfaService
+  ) {}
 
   @Post("register")
   @UseGuards(AuthRateLimitGuard)
@@ -71,10 +77,40 @@ export class AuthController {
     res.clearCookie(REFRESH_COOKIE);
   }
 
+  @Post("mfa/setup")
+  @UseGuards(JwtAuthGuard)
+  mfaSetup(@CurrentUser() user: RequestUser) {
+    return this.mfa.generateSetup(user.userId, user.email);
+  }
+
+  @Post("mfa/enable")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  async mfaEnable(@CurrentUser() user: RequestUser, @Body() dto: MfaEnableDto) {
+    await this.mfa.enable(user.userId, dto.secret, dto.code);
+    return { mfaEnabled: true };
+  }
+
+  @Post("mfa/verify")
+  @HttpCode(200)
+  @UseGuards(AuthRateLimitGuard)
+  async mfaVerifyLogin(
+    @Body() dto: MfaVerifyLoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const tokens = await this.auth.completeMfaLogin(dto.challengeToken, dto.code, {
+      userAgent: req.headers["user-agent"],
+      ip: req.ip,
+    });
+    this.setRefreshCookie(res, tokens.refreshToken);
+    return { accessToken: tokens.accessToken, expiresIn: tokens.expiresIn };
+  }
+
   @Get("me")
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: RequestUser) {
-    return { id: user.userId, email: user.email };
+    return { id: user.userId, email: user.email, mfaEnabled: false };
   }
 
   private setRefreshCookie(res: Response, refreshToken: string): void {
