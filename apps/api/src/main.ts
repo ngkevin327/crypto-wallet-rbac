@@ -1,5 +1,6 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import { defaultValidationPipeOptions } from "./common/pipes/validation-options";
 import { ConfigService } from "@nestjs/config";
@@ -17,6 +18,15 @@ async function bootstrap(): Promise<void> {
   const prefix = config.get<string>("apiPrefix") ?? "v1";
 
   app.setGlobalPrefix(prefix);
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle("Wallet Team Permissions API")
+    .setDescription("REST API for wallet permissions, approvals, and audit")
+    .setVersion("0.1.0")
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup(`${prefix}/docs`, app, document);
 
   await app.listen(port);
   const logger = app.get(Logger);
