@@ -5,7 +5,10 @@
     "jsx": "preserve",
     "noEmit": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*", "next-env.d.ts"],
   "exclude": ["node_modules"]
