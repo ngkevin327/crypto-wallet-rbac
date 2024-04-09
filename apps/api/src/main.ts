@@ -2,6 +2,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import { defaultValidationPipeOptions } from "./common/pipes/validation-options";
 import { ConfigService } from "@nestjs/config";
 import { Logger } from "nestjs-pino";
@@ -12,6 +13,11 @@ async function bootstrap(): Promise<void> {
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe(defaultValidationPipeOptions));
   app.use(cookieParser());
+  app.use(helmet());
+  app.enableCors({
+    origin: process.env.CORS_ORIGINS?.split(",") ?? ["http://localhost:3000"],
+    credentials: true,
+  });
 
   const config = app.get(ConfigService);
   const port = config.get<number>("port") ?? 3001;

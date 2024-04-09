@@ -14,7 +14,15 @@ import { LoggerModule as PinoLoggerModule } from "nestjs-pino";
             transport: isDev
               ? { target: "pino-pretty", options: { singleLine: true } }
               : undefined,
-            redact: ["req.headers.authorization", "req.headers.cookie"],
+            redact: {
+              paths: [
+                "req.headers.authorization",
+                "req.headers.cookie",
+                "req.body.password",
+                "req.body.refreshToken",
+              ],
+              censor: "[REDACTED]",
+            },
           },
         };
       },
