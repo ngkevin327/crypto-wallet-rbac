@@ -25,23 +25,47 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
         continue-on-error: true
 
-      - name: Install dependencies (no lockfile)
+      - run: pnpm install
         if: failure()
-        run: pnpm install
 
-      - name: Typecheck API
-        run: pnpm --filter @wtp/api typecheck
+      - run: pnpm --filter @wtp/api typecheck
+      - run: pnpm --filter @wtp/shared typecheck
+      - run: pnpm --filter @wtp/policy-engine typecheck
+      - run: pnpm --filter @wtp/web typecheck
 
-      - name: Typecheck shared packages
-        run: pnpm --filter @wtp/shared typecheck
-
-      - name: Typecheck policy-engine
-        run: pnpm --filter @wtp/policy-engine typecheck
-
-      - name: Lint root
-        run: pnpm exec eslint . --max-warnings 0
-        continue-on-error: true
+  api-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: wtp
+          POSTGRES_PASSWORD: wtp_local
+          POSTGRES_DB: wtp
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://wtp:wtp_local@localhost:5432/wtp?schema=public
+      JWT_ACCESS_SECRET: ci-test-secret-minimum-16-chars
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter @wtp/api exec prisma generate
+      - run: pnpm --filter @wtp/api exec prisma migrate deploy
+        working-directory: apps/api
+      - run: pnpm --filter @wtp/api test
