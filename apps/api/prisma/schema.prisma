@@ -16,8 +16,49 @@ model User {
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
   sessions     Session[]
+  members      Member[]
 
   @@map("users")
+}
+
+enum PlatformRole {
+  org_admin
+  org_member
+  org_viewer
+}
+
+enum MemberStatus {
+  invited
+  active
+  deactivated
+}
+
+model Organization {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  members   Member[]
+  invites   Invite[]
+  wallets   Wallet[]
+
+  @@map("organizations")
+}
+
+model Member {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  platformRole   PlatformRole @default(org_member) @map("platform_role")
+  status         MemberStatus @default(active)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@map("members")
 }
 
 model Session {
