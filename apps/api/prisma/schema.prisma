@@ -61,6 +61,30 @@ model Member {
   @@map("members")
 }
 
+enum InviteStatus {
+  pending
+  accepted
+  revoked
+  expired
+}
+
+model Invite {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  email          String
+  tokenHash      String       @map("token_hash")
+  platformRole   PlatformRole @default(org_member) @map("platform_role")
+  status         InviteStatus @default(pending)
+  invitedById    String       @map("invited_by_id") @db.Uuid
+  expiresAt      DateTime     @map("expires_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, email])
+  @@index([tokenHash])
+  @@map("invites")
+}
+
 model Session {
   id               String   @id @default(uuid()) @db.Uuid
   userId           String   @map("user_id") @db.Uuid
