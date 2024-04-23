@@ -19,5 +19,7 @@ export default () => {
     redisUrl: parsed.REDIS_URL,
     jwtAccessSecret: parsed.JWT_ACCESS_SECRET,
     logLevel: parsed.LOG_LEVEL,
+    ethRpcUrlSepolia: process.env.ETH_RPC_URL_SEPOLIA,
+    ethRpcUrlMainnet: process.env.ETH_RPC_URL_MAINNET,
   };
 };

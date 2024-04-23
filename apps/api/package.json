@@ -37,7 +37,8 @@
     "ioredis": "^5.4.2",
     "otplib": "^12.0.1",
     "@nestjs/swagger": "^8.1.0",
-    "helmet": "^8.0.0"
+    "helmet": "^8.0.0",
+    "viem": "^2.21.54"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
