@@ -35,7 +35,8 @@ export class WalletController {
       dto.address,
       dto.chainId,
       undefined,
-      dto.challengeId
+      dto.challengeId,
+      dto.signature
     );
   }
 }

@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../database/prisma.service";
 import { SafeAdapter } from "./safe/safe-adapter";
+import { WalletAuthService } from "./wallet-auth.service";
 import { WalletSyncService } from "./wallet-sync.service";
 
 export interface WalletConnectChallenge {
@@ -18,7 +19,8 @@ export class WalletService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly safe: SafeAdapter,
-    private readonly sync: WalletSyncService
+    private readonly sync: WalletSyncService,
+    private readonly walletAuth: WalletAuthService
   ) {}
 
   async startConnect(
@@ -44,16 +46,20 @@ export class WalletService {
       });
     }
 
-    const challengeId = `wch_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
     const message = [
       "Wallet Team Permissions — verify Safe ownership",
       `Organization: ${orgId}`,
       `Safe: ${meta.address}`,
       `Chain ID: ${chainId}`,
-      `Challenge: ${challengeId}`,
-      `Expires: ${expiresAt.toISOString()}`,
     ].join("\n");
+
+    const { challengeId, expiresAt } = await this.walletAuth.createChallenge(
+      orgId,
+      meta.address,
+      chainId,
+      message,
+      nickname
+    );
 
     return { challengeId, message, expiresAt };
   }
@@ -63,8 +69,13 @@ export class WalletService {
     address: string,
     chainId: number,
     nickname: string | undefined,
-    _challengeId: string
+    challengeId: string,
+    signature: string
   ) {
+    const { challenge } = await this.walletAuth.verifySigner(challengeId, signature);
+    if (challenge.orgId !== orgId) {
+      throw new ConflictException({ code: "ORG_MISMATCH" });
+    }
     const meta = await this.safe.validateWallet(address, chainId);
     const wallet = await this.prisma.wallet.create({
       data: {
