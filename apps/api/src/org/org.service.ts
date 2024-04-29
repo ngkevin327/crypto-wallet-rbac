@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { MemberStatus, PlatformRole } from "@prisma/client";
+import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 
 @Injectable()
 export class OrgService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly audit: AuditService
+  ) {}
 
   async createOrganization(name: string, creatorUserId: string) {
     return this.prisma.$transaction(async (tx) => {
@@ -17,6 +21,7 @@ export class OrgService {
           status: MemberStatus.active,
         },
       });
+      await this.audit.appendOrgCreated(org.id, creatorUserId, name);
       return org;
     });
   }

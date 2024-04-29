@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { InviteStatus, MemberStatus, PlatformRole } from "@prisma/client";
 import { createHash, randomBytes } from "crypto";
+import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 import { EmailPort } from "../notifications/email.port";
 
@@ -14,7 +15,8 @@ import { EmailPort } from "../notifications/email.port";
 export class InviteService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly email: EmailPort
+    private readonly email: EmailPort,
+    private readonly audit: AuditService
   ) {}
 
   async createInvite(
@@ -65,6 +67,8 @@ export class InviteService {
       subject: "You are invited to Wallet Team Permissions",
       text: `Accept your invite: ${webUrl}/invite?token=${rawToken}`,
     });
+
+    await this.audit.appendMemberInvited(orgId, invitedByUserId, normalized, invite.id);
 
     return { inviteId: invite.id, expiresAt };
   }

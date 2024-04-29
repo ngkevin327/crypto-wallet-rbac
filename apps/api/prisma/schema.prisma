@@ -62,6 +62,19 @@ model Wallet {
   @@map("wallets")
 }
 
+model AuditEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  eventType      String   @map("event_type")
+  actorId        String?  @map("actor_id") @db.Uuid
+  payload        Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt])
+  @@map("audit_events")
+}
+
 model Member {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @map("organization_id") @db.Uuid

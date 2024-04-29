@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { CurrentUser, type RequestUser } from "../auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
 import { ConnectWalletDto } from "./dto/connect-wallet.dto";
@@ -29,14 +30,19 @@ export class WalletController {
   }
 
   @Post("verify")
-  verify(@Param("orgId") orgId: string, @Body() dto: VerifyWalletDto) {
+  verify(
+    @Param("orgId") orgId: string,
+    @CurrentUser() user: RequestUser,
+    @Body() dto: VerifyWalletDto
+  ) {
     return this.wallets.completeConnect(
       orgId,
       dto.address,
       dto.chainId,
       undefined,
       dto.challengeId,
-      dto.signature
+      dto.signature,
+      user.userId
     );
   }
 }

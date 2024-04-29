@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 import { SafeAdapter } from "./safe/safe-adapter";
 import { WalletAuthService } from "./wallet-auth.service";
@@ -20,7 +21,8 @@ export class WalletService {
     private readonly prisma: PrismaService,
     private readonly safe: SafeAdapter,
     private readonly sync: WalletSyncService,
-    private readonly walletAuth: WalletAuthService
+    private readonly walletAuth: WalletAuthService,
+    private readonly audit: AuditService
   ) {}
 
   async startConnect(
@@ -70,9 +72,10 @@ export class WalletService {
     chainId: number,
     nickname: string | undefined,
     challengeId: string,
-    signature: string
+    signature: string,
+    actorUserId: string
   ) {
-    const { challenge } = await this.walletAuth.verifySigner(challengeId, signature);
+    const { challenge, signer } = await this.walletAuth.verifySigner(challengeId, signature);
     if (challenge.orgId !== orgId) {
       throw new ConflictException({ code: "ORG_MISMATCH" });
     }
@@ -88,6 +91,13 @@ export class WalletService {
       },
     });
     await this.sync.syncWalletById(wallet.id);
+    await this.audit.appendWalletConnected(
+      orgId,
+      actorUserId,
+      wallet.id,
+      wallet.address,
+      wallet.chainId
+    );
     return wallet;
   }
 

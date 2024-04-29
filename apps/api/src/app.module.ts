@@ -4,8 +4,10 @@ import { AppConfigModule } from "./config/config.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
+import { AuditModule } from "./audit/audit.module";
 import { AuthModule } from "./auth/auth.module";
 import { OrgModule } from "./org/org.module";
+import { WalletModule } from "./wallet/wallet.module";
 import { DatabaseModule } from "./database/database.module";
 import { RedisModule } from "./redis/redis.module";
 import { HealthModule } from "./health/health.module";
@@ -15,11 +17,13 @@ import { AppLoggerModule } from "./logger/logger.module";
   imports: [
     AppConfigModule,
     AppLoggerModule,
+    AuditModule,
     DatabaseModule,
     RedisModule,
     HealthModule,
     AuthModule,
     OrgModule,
+    WalletModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
