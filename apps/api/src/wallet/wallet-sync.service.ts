@@ -23,6 +23,7 @@ export class WalletSyncService {
       where: { id: walletId },
       data: {
         safeThreshold: meta.threshold,
+        safeOwners: meta.owners,
         lastSyncedAt: new Date(),
       },
     });

@@ -6,6 +6,7 @@ export interface WalletRecord {
   chainId: number;
   nickname: string | null;
   safeThreshold: number | null;
+  safeOwners: string[];
   lastSyncedAt: string | null;
 }
 
