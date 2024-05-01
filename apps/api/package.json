@@ -6,6 +6,8 @@
     "build": "tsc -p tsconfig.build.json",
     "dev": "nest start --watch",
     "start": "node dist/main.js",
+    "worker": "tsx src/worker.ts",
+    "worker:dev": "tsx watch src/worker.ts",
     "lint": "eslint \"{src,test}/**/*.ts\" --max-warnings 0",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
@@ -38,7 +40,8 @@
     "otplib": "^12.0.1",
     "@nestjs/swagger": "^8.1.0",
     "helmet": "^8.0.0",
-    "viem": "^2.21.54"
+    "viem": "^2.21.54",
+    "bullmq": "^5.34.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

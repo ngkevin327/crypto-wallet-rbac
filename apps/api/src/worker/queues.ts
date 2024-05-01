@@ -5,3 +5,8 @@ export const QUEUE_TX_STATUS = "tx-status";
 
 export const WALLET_SYNC_JOB = "sync-wallet";
 export const WALLET_SYNC_CRON = "wallet-sync-cron";
+
+export interface WalletSyncJobPayload {
+  walletId?: string;
+  cron?: boolean;
+}
