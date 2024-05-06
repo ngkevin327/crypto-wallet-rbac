@@ -7,6 +7,7 @@ import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 import { SafeAdapter } from "./safe/safe-adapter";
 import { WalletAuthService } from "./wallet-auth.service";
+import { WalletSyncQueue } from "../worker/wallet-sync.queue";
 import { WalletSyncService } from "./wallet-sync.service";
 
 export interface WalletConnectChallenge {
@@ -21,6 +22,7 @@ export class WalletService {
     private readonly prisma: PrismaService,
     private readonly safe: SafeAdapter,
     private readonly sync: WalletSyncService,
+    private readonly syncQueue: WalletSyncQueue,
     private readonly walletAuth: WalletAuthService,
     private readonly audit: AuditService
   ) {}
@@ -90,7 +92,7 @@ export class WalletService {
         lastSyncedAt: new Date(),
       },
     });
-    await this.sync.syncWalletById(wallet.id);
+    await this.syncQueue.enqueueWalletSync(wallet.id);
     await this.audit.appendWalletConnected(
       orgId,
       actorUserId,
