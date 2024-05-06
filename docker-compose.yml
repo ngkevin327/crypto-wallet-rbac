@@ -31,6 +31,24 @@ services:
       timeout: 3s
       retries: 5
 
+  api-worker:
+    profiles: ["workers"]
+    image: node:20-alpine
+    container_name: wtp-api-worker
+    working_dir: /app
+    command: sh -c "corepack enable && pnpm install && pnpm --filter @wtp/api worker"
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://wtp:wtp_local@postgres:5432/wtp
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   wtp_postgres_data:
   wtp_redis_data:

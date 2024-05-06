@@ -41,6 +41,18 @@ pnpm dev            # API :3001, web :3000
 
 Or use `pnpm db:up` as an alias for `docker compose up -d`.
 
+Background workers (wallet sync, approval expiry) run as a separate process:
+
+```bash
+pnpm --filter @wtp/api worker:dev
+```
+
+Or start the worker container with Docker Compose:
+
+```bash
+docker compose --profile workers up -d
+```
+
 | Script | Description |
 |--------|-------------|
 | `pnpm db:up` | Start Postgres and Redis containers |
