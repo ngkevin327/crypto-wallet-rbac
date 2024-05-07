@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { CurrentUser, type RequestUser } from "../auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
@@ -15,6 +15,8 @@ export class WalletController {
   constructor(private readonly wallets: WalletService) {}
 
   @Get()
+  @ApiOperation({ summary: "List connected Safes for an organization" })
+  @ApiResponse({ status: 200, description: "Wallet records including owners and sync metadata" })
   list(@Param("orgId") orgId: string) {
     return this.wallets.listWallets(orgId);
   }
@@ -25,11 +27,19 @@ export class WalletController {
   }
 
   @Post("connect")
+  @ApiOperation({
+    summary: "Start Safe connect flow",
+    description: "Validates the Safe on-chain and returns a challenge message to sign.",
+  })
   connect(@Param("orgId") orgId: string, @Body() dto: ConnectWalletDto) {
     return this.wallets.startConnect(orgId, dto.address, dto.chainId, dto.nickname);
   }
 
   @Post("verify")
+  @ApiOperation({
+    summary: "Verify wallet ownership",
+    description: "Accepts EIP-191 signature over the connect challenge; persists the Safe.",
+  })
   verify(
     @Param("orgId") orgId: string,
     @CurrentUser() user: RequestUser,
