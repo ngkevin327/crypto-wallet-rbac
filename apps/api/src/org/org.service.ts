@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { MemberStatus, PlatformRole } from "@prisma/client";
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
+import { RoleSeedService } from "../roles/role-seed.service";
 
 @Injectable()
 export class OrgService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
+    private readonly roleSeed: RoleSeedService
   ) {}
 
   async createOrganization(name: string, creatorUserId: string) {
@@ -21,6 +23,7 @@ export class OrgService {
           status: MemberStatus.active,
         },
       });
+      await this.roleSeed.seedTemplatesForOrganization(org.id, tx);
       await this.audit.appendOrgCreated(org.id, creatorUserId, name);
       return org;
     });
