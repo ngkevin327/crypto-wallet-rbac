@@ -51,6 +51,7 @@ model Organization {
   invites   Invite[]
   wallets   Wallet[]
   roles     Role[]
+  policies  Policy[]
 
   @@map("organizations")
 }
@@ -63,6 +64,7 @@ model Role {
   createdAt      DateTime         @default(now()) @map("created_at")
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignments    RoleAssignment[]
+  policies       Policy[]
 
   @@unique([organizationId, templateType])
   @@index([organizationId])
@@ -86,6 +88,30 @@ model RoleAssignment {
   @@map("role_assignments")
 }
 
+enum PolicyStatus {
+  active
+  archived
+}
+
+model Policy {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @map("organization_id") @db.Uuid
+  roleId         String       @map("role_id") @db.Uuid
+  walletId       String?      @map("wallet_id") @db.Uuid
+  version        Int          @default(1)
+  status         PolicyStatus @default(active)
+  rules          Json         @default("[]")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  wallet         Wallet?      @relation(fields: [walletId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([roleId, walletId])
+  @@map("policies")
+}
+
 model Wallet {
   id             String       @id @default(uuid()) @db.Uuid
   organizationId String       @map("organization_id") @db.Uuid
@@ -97,8 +123,9 @@ model Wallet {
   lastSyncedAt   DateTime?    @map("last_synced_at")
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   roleAssignments RoleAssignment[]
+  policies        Policy[]
 
   @@unique([organizationId, address, chainId])
   @@index([organizationId])
