@@ -7,6 +7,7 @@ import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.midd
 import { AuditModule } from "./audit/audit.module";
 import { AuthModule } from "./auth/auth.module";
 import { OrgModule } from "./org/org.module";
+import { PolicyModule } from "./policy/policy.module";
 import { RolesModule } from "./roles/roles.module";
 import { WalletModule } from "./wallet/wallet.module";
 import { DatabaseModule } from "./database/database.module";
@@ -25,6 +26,7 @@ import { AppLoggerModule } from "./logger/logger.module";
     AuthModule,
     OrgModule,
     RolesModule,
+    PolicyModule,
     WalletModule,
   ],
   providers: [
