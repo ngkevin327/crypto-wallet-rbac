@@ -17,7 +17,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,md}\"",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:wait": "tsx scripts/wait-for-db.ts"
+    "db:wait": "tsx scripts/wait-for-db.ts",
+    "perf:policy": "pnpm --filter @wtp/api exec tsx src/policy/policy-evaluation.bench.ts"
   },
   "devDependencies": {
     "pg": "^8.13.1",
