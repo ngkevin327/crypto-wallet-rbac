@@ -31,9 +31,10 @@ export class PolicyController {
   createForRole(
     @Param("orgId") orgId: string,
     @Param("roleId") roleId: string,
+    @CurrentUser() user: RequestUser,
     @Body() dto: CreatePolicyDto
   ) {
-    return this.policies.createForRole(orgId, roleId, dto.rules, dto.walletId);
+    return this.policies.createForRole(orgId, roleId, dto.rules, user.userId, dto.walletId);
   }
 
   @Get("orgs/:orgId/policies")

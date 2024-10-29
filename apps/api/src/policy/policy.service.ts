@@ -8,6 +8,8 @@ import {
 import { MemberStatus, PlatformRole, PolicyStatus } from "@prisma/client";
 import { INVALID_POLICY_RULE, parsePolicyRules } from "@wtp/shared/policy/policy.schema";
 import type { PolicyRule } from "@wtp/shared/policy/rule-types";
+import { createHash } from "crypto";
+import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 import { PolicyRepository } from "./policy.repository";
 
@@ -15,13 +17,15 @@ import { PolicyRepository } from "./policy.repository";
 export class PolicyService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly policies: PolicyRepository
+    private readonly policies: PolicyRepository,
+    private readonly audit: AuditService
   ) {}
 
   async createForRole(
     orgId: string,
     roleId: string,
     rulesInput: unknown,
+    actorUserId: string,
     walletId?: string
   ) {
     await this.assertRoleInOrg(orgId, roleId);
@@ -38,15 +42,32 @@ export class PolicyService {
       });
     }
 
-    return this.policies.createActive({
+    const created = await this.policies.createActive({
       organizationId: orgId,
       roleId,
       walletId: walletId ?? null,
       rules,
     });
+    await this.audit.append({
+      eventType: "policy.created",
+      organizationId: orgId,
+      actorId: actorUserId,
+      payload: {
+        policyId: created.id,
+        roleId,
+        version: created.version,
+        rulesHash: this.hashRules(rules),
+      },
+    });
+    return created;
   }
 
-  async updatePolicy(orgId: string, policyId: string, rulesInput: unknown) {
+  async updatePolicy(
+    orgId: string,
+    policyId: string,
+    rulesInput: unknown,
+    actorUserId?: string
+  ) {
     const current = await this.policies.findById(policyId);
     if (!current || current.organizationId !== orgId) {
       throw new NotFoundException({ code: "POLICY_NOT_FOUND" });
@@ -56,7 +77,7 @@ export class PolicyService {
     }
 
     const rules = this.parseRules(rulesInput);
-    return this.policies.archiveAndCreateVersion(
+    const updated = await this.policies.archiveAndCreateVersion(
       current.id,
       {
         organizationId: orgId,
@@ -66,6 +87,20 @@ export class PolicyService {
       },
       current.version + 1
     );
+    if (actorUserId) {
+      await this.audit.append({
+        eventType: "policy.updated",
+        organizationId: orgId,
+        actorId: actorUserId,
+        payload: {
+          policyId: updated.id,
+          roleId: current.roleId,
+          version: updated.version,
+          rulesHash: this.hashRules(rules),
+        },
+      });
+    }
+    return updated;
   }
 
   async listPolicies(
@@ -93,7 +128,7 @@ export class PolicyService {
       throw new NotFoundException({ code: "POLICY_NOT_FOUND" });
     }
     await this.assertOrgAdmin(policy.organizationId, userId);
-    return this.updatePolicy(policy.organizationId, policyId, rulesInput);
+    return this.updatePolicy(policy.organizationId, policyId, rulesInput, userId);
   }
 
   async archivePolicyAsAdmin(userId: string, policyId: string) {
@@ -102,15 +137,32 @@ export class PolicyService {
       throw new NotFoundException({ code: "POLICY_NOT_FOUND" });
     }
     await this.assertOrgAdmin(policy.organizationId, userId);
-    return this.archivePolicy(policy.organizationId, policyId);
+    return this.archivePolicy(policy.organizationId, policyId, userId);
   }
 
-  async archivePolicy(orgId: string, policyId: string) {
+  async archivePolicy(orgId: string, policyId: string, actorUserId?: string) {
     const policy = await this.getById(orgId, policyId);
     if (policy.status === PolicyStatus.archived) {
       return policy;
     }
-    return this.policies.archiveById(policyId);
+    const archived = await this.policies.archiveById(policyId);
+    if (actorUserId) {
+      await this.audit.append({
+        eventType: "policy.deleted",
+        organizationId: orgId,
+        actorId: actorUserId,
+        payload: {
+          policyId,
+          roleId: policy.roleId,
+          version: policy.version,
+        },
+      });
+    }
+    return archived;
+  }
+
+  private hashRules(rules: PolicyRule[]): string {
+    return createHash("sha256").update(JSON.stringify(rules)).digest("hex");
   }
 
   private parseRules(input: unknown): PolicyRule[] {

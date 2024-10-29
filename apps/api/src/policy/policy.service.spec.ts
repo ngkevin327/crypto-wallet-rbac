@@ -2,6 +2,7 @@ import { ConflictException, NotFoundException } from "@nestjs/common";
 import { PolicyStatus } from "@prisma/client";
 import { PolicyService } from "./policy.service";
 import { PolicyRepository } from "./policy.repository";
+import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 
 describe("PolicyService", () => {
@@ -22,11 +23,13 @@ describe("PolicyService", () => {
     archiveById: jest.fn(),
   } as unknown as PolicyRepository;
 
+  const audit = { append: jest.fn() } as unknown as AuditService;
+
   let service: PolicyService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new PolicyService(prisma, policies);
+    service = new PolicyService(prisma, policies, audit);
     (prisma.role.findFirst as jest.Mock).mockResolvedValue({ id: roleId, organizationId: orgId });
   });
 
@@ -40,7 +43,7 @@ describe("PolicyService", () => {
 
     const result = await service.createForRole(orgId, roleId, [
       { type: "max_usd_per_day", maxUsd: 100 },
-    ]);
+    ], "user-1");
 
     expect(result.version).toBe(1);
     expect(policies.createActive).toHaveBeenCalled();
@@ -50,7 +53,7 @@ describe("PolicyService", () => {
     (policies.findActiveByScope as jest.Mock).mockResolvedValue({ id: "existing" });
 
     await expect(
-      service.createForRole(orgId, roleId, [{ type: "max_usd_per_day", maxUsd: 100 }])
+      service.createForRole(orgId, roleId, [{ type: "max_usd_per_day", maxUsd: 100 }], "user-1")
     ).rejects.toBeInstanceOf(ConflictException);
   });
 
