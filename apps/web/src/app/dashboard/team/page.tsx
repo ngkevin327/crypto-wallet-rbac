@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createOrg, deactivateMember, listMembers, listOrgs } from "@/lib/api/orgs";
 import { InviteMemberModal } from "@/components/team/invite-member-modal";
+import { MemberDrawer } from "@/components/team/member-drawer";
 import { MemberTable } from "@/components/team/member-table";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -11,6 +12,7 @@ export default function TeamPage() {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [members, setMembers] = useState<Awaited<ReturnType<typeof listMembers>>>([]);
   const [showInvite, setShowInvite] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<(typeof members)[0] | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -59,7 +61,20 @@ export default function TeamPage() {
         </button>
       </div>
 
-      <MemberTable members={members} onDeactivate={handleDeactivate} />
+      <MemberTable
+        members={members}
+        onDeactivate={handleDeactivate}
+        onSelect={setSelectedMember}
+      />
+
+      {selectedMember && token && orgId && (
+        <MemberDrawer
+          member={selectedMember}
+          orgId={orgId}
+          token={token}
+          onClose={() => setSelectedMember(null)}
+        />
+      )}
 
       {showInvite && token && orgId && (
         <InviteMemberModal

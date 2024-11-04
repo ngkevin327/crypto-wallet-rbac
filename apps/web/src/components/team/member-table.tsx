@@ -11,9 +11,10 @@ const STATUS_STYLES: Record<string, string> = {
 interface Props {
   members: MemberRow[];
   onDeactivate?: (memberId: string) => void;
+  onSelect?: (member: MemberRow) => void;
 }
 
-export function MemberTable({ members, onDeactivate }: Props) {
+export function MemberTable({ members, onDeactivate, onSelect }: Props) {
   return (
     <div className="overflow-hidden rounded-lg border border-surface-border">
       <table className="w-full text-sm text-left">
@@ -27,7 +28,11 @@ export function MemberTable({ members, onDeactivate }: Props) {
         </thead>
         <tbody>
           {members.map((m) => (
-            <tr key={m.id} className="border-t border-surface-border">
+            <tr
+              key={m.id}
+              className="border-t border-surface-border cursor-pointer hover:bg-surface/50"
+              onClick={() => onSelect?.(m)}
+            >
               <td className="px-4 py-3 text-slate-200">{m.user.email}</td>
               <td className="px-4 py-3 text-slate-400">{m.platformRole}</td>
               <td className="px-4 py-3">
