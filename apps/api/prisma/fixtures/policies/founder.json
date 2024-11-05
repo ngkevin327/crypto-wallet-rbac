@@ -1,0 +1,7 @@
+{
+  "templateType": "founder",
+  "rules": [
+    { "type": "max_usd_per_day", "maxUsd": 1000000 },
+    { "type": "max_usd_per_transaction", "maxUsd": 250000 }
+  ]
+}

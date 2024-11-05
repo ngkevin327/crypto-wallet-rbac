@@ -23,6 +23,17 @@ async function main(): Promise<void> {
   });
 
   console.log(`Created seed user ${email}`);
+
+  const org = await prisma.organization.create({ data: { name: "Demo Organization" } });
+  await prisma.member.create({
+    data: {
+      organizationId: org.id,
+      userId: (await prisma.user.findUniqueOrThrow({ where: { email } })).id,
+      platformRole: "org_admin",
+      status: "active",
+    },
+  });
+  console.log(`Created demo org ${org.id}`);
 }
 
 main()
