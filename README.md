@@ -87,7 +87,14 @@ apps/web          Admin dashboard
 packages/shared   Shared types and utilities
 packages/policy-engine   Pure policy evaluation
 docs/adr          Architecture decision records
+docs/developer    Policy DSL and evaluation flow
+docs/runbooks     Operational runbooks
 ```
+
+Developer guides:
+
+- [Policy rule DSL](docs/developer/policy-dsl.md)
+- [Policy evaluation flow](docs/developer/policy-evaluation-flow.md)
 
 ## License
 
