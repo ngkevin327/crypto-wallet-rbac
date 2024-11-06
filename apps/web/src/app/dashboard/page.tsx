@@ -1,9 +1,18 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { listOrgs } from "@/lib/api/orgs";
+import { SetupChecklist } from "@/components/dashboard/setup-checklist";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
+  const [orgId, setOrgId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    listOrgs(token).then((orgs) => setOrgId(orgs[0]?.id ?? null));
+  }, [token]);
 
   if (loading) {
     return <p className="text-slate-400">Loading…</p>;
@@ -11,6 +20,7 @@ export default function DashboardPage() {
 
   return (
     <div>
+      {token && orgId && <SetupChecklist token={token} orgId={orgId} />}
       <h1 className="text-2xl font-semibold text-white mb-2">Dashboard</h1>
       <p className="text-slate-400 mb-8">
         Welcome{user ? `, ${user.email}` : ""}. Connect your first Safe to get started.
