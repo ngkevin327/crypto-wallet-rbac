@@ -54,6 +54,18 @@ enum IntentStatus {
   cancelled
 }
 
+enum ApprovalRequestStatus {
+  pending
+  fulfilled
+  rejected
+  expired
+}
+
+enum ApprovalDecisionType {
+  approved
+  rejected
+}
+
 model Organization {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
@@ -124,6 +136,7 @@ model TransactionIntent {
   wallet             Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
   member             Member          @relation(fields: [memberId], references: [id], onDelete: Cascade)
   policyVersion      Policy?         @relation(fields: [policyVersionId], references: [id], onDelete: SetNull)
+  approvalRequests   ApprovalRequest[]
 
   @@index([organizationId, status])
   @@index([memberId, createdAt(sort: Desc)])
@@ -201,6 +214,7 @@ model Member {
   user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   roleAssignments RoleAssignment[]
   intents         TransactionIntent[]
+  approvalDecisions ApprovalDecision[]
 
   @@unique([organizationId, userId])
   @@index([organizationId])
@@ -244,4 +258,36 @@ model Session {
   @@index([userId])
   @@index([expiresAt])
   @@map("sessions")
+}
+
+model ApprovalRequest {
+  id              String                @id @default(uuid()) @db.Uuid
+  intentId        String                @map("intent_id") @db.Uuid
+  requiredCount   Int                   @map("required_count")
+  approverRoleIds String[]              @default([]) @map("approver_role_ids")
+  status          ApprovalRequestStatus @default(pending)
+  expiresAt       DateTime              @map("expires_at")
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+  intent          TransactionIntent     @relation(fields: [intentId], references: [id], onDelete: Cascade)
+  decisions       ApprovalDecision[]
+
+  @@index([intentId])
+  @@index([status, expiresAt])
+  @@map("approval_requests")
+}
+
+model ApprovalDecision {
+  id        String               @id @default(uuid()) @db.Uuid
+  requestId String               @map("request_id") @db.Uuid
+  memberId  String               @map("member_id") @db.Uuid
+  decision  ApprovalDecisionType
+  note      String?
+  decidedAt DateTime             @default(now()) @map("decided_at")
+  request   ApprovalRequest      @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  member    Member               @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, memberId])
+  @@index([memberId])
+  @@map("approval_decisions")
 }
