@@ -23,6 +23,11 @@ import { RateCounterService } from "./rate-counter.service";
     OrgMemberGuard,
     OrgAdminGuard,
   ],
-  exports: [PolicyService, PolicyEvaluationService, RateCounterService],
+  exports: [
+    PolicyService,
+    PolicyEvaluationService,
+    PolicyResolverService,
+    RateCounterService,
+  ],
 })
 export class PolicyModule {}

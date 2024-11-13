@@ -7,6 +7,7 @@ import {
 } from "@wtp/shared/intent/intent-state-machine";
 import { PrismaService } from "../database/prisma.service";
 import { PolicyEvaluationService } from "../policy/policy-evaluation.service";
+import { PolicyResolverService } from "../policy/policy-resolver.service";
 import { RateCounterService } from "../policy/rate-counter.service";
 import type { CreateIntentDto } from "./dto/create-intent.dto";
 import { IntentRepository } from "./intent.repository";
@@ -17,6 +18,7 @@ export class IntentService {
     private readonly prisma: PrismaService,
     private readonly repository: IntentRepository,
     private readonly policyEvaluation: PolicyEvaluationService,
+    private readonly policyResolver: PolicyResolverService,
     private readonly rateCounters: RateCounterService
   ) {}
 
@@ -51,6 +53,12 @@ export class IntentService {
       policyEventFromDecision(decision.decision)
     );
 
+    const policyVersionId = await this.policyResolver.resolvePolicyVersionId(
+      orgId,
+      memberId,
+      dto.walletId
+    );
+
     const intent = await this.repository.create({
       organizationId: orgId,
       walletId: dto.walletId,
@@ -62,7 +70,8 @@ export class IntentService {
       toAddress: dto.toAddress,
       calldata: dto.calldata ?? null,
       status,
-      policyDecisionJson: decision as unknown as Prisma.InputJsonValue,
+      policyVersionId,
+      policyDecisionJson: IntentService.decisionSnapshot(decision),
     });
 
     if (decision.decision === "ALLOW" && amountUsd != null) {
