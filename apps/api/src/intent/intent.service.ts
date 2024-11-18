@@ -1,5 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { IntentStatus, Prisma } from "@prisma/client";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { IntentStatus, MemberStatus, Prisma } from "@prisma/client";
 import type { PolicyDecision } from "@wtp/policy-engine";
 import {
   policyEventFromDecision,
@@ -87,13 +91,23 @@ export class IntentService {
     return { intent, decision };
   }
 
-  async getById(intentId: string) {
+  async getById(intentId: string, userId: string) {
     const intent = await this.repository.findById(intentId);
     if (!intent) {
       throw new NotFoundException({
         code: "INTENT_NOT_FOUND",
         message: "Intent not found",
       });
+    }
+    const member = await this.prisma.member.findFirst({
+      where: {
+        organizationId: intent.organizationId,
+        userId,
+        status: MemberStatus.active,
+      },
+    });
+    if (!member) {
+      throw new ForbiddenException({ code: "ORG_ACCESS_DENIED" });
     }
     return intent;
   }
