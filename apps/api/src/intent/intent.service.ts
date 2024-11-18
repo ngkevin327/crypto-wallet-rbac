@@ -5,6 +5,7 @@ import {
   policyEventFromDecision,
   transitionIntentStatus,
 } from "@wtp/shared/intent/intent-state-machine";
+import { PolicyDeniedException } from "../common/errors/policy-denied.exception";
 import { PrismaService } from "../database/prisma.service";
 import { PolicyEvaluationService } from "../policy/policy-evaluation.service";
 import { PolicyResolverService } from "../policy/policy-resolver.service";
@@ -77,6 +78,10 @@ export class IntentService {
     if (decision.decision === "ALLOW" && amountUsd != null) {
       await this.rateCounters.incrementDailyUsd(orgId, memberId, amountUsd);
       await this.rateCounters.incrementHourlyTx(orgId, memberId);
+    }
+
+    if (decision.decision === "DENY") {
+      throw new PolicyDeniedException(decision.reasons, intent.id);
     }
 
     return { intent, decision };

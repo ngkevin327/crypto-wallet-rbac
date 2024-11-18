@@ -1,7 +1,9 @@
 import { NotFoundException } from "@nestjs/common";
+import { PolicyDeniedException } from "../common/errors/policy-denied.exception";
 import { Test } from "@nestjs/testing";
 import { IntentStatus } from "@prisma/client";
 import { PolicyEvaluationService } from "../policy/policy-evaluation.service";
+import { PolicyResolverService } from "../policy/policy-resolver.service";
 import { RateCounterService } from "../policy/rate-counter.service";
 import { PrismaService } from "../database/prisma.service";
 import { IntentRepository } from "./intent.repository";
@@ -25,6 +27,9 @@ describe("IntentService", () => {
     incrementDailyUsd: jest.fn(),
     incrementHourlyTx: jest.fn(),
   };
+  const policyResolver = {
+    resolvePolicyVersionId: jest.fn().mockResolvedValue("policy-1"),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -34,6 +39,7 @@ describe("IntentService", () => {
         { provide: PrismaService, useValue: prisma },
         { provide: IntentRepository, useValue: repository },
         { provide: PolicyEvaluationService, useValue: policyEvaluation },
+        { provide: PolicyResolverService, useValue: policyResolver },
         { provide: RateCounterService, useValue: rateCounters },
       ],
     }).compile();
@@ -104,6 +110,24 @@ describe("IntentService", () => {
     const result = await service.create("org-1", "member-1", dto);
 
     expect(result.intent.status).toBe(IntentStatus.denied);
+  });
+
+  it("throws PolicyDeniedException after persisting denied intent", async () => {
+    prisma.wallet.findFirst.mockResolvedValue({ id: "wallet-1" });
+    policyEvaluation.evaluateIntent.mockResolvedValue({
+      decision: "DENY",
+      reasons: ["POLICY_DENIED_MAX_USD_PER_TX"],
+      matchedRules: [],
+    });
+    policyEvaluation.resolveAmountUsd.mockResolvedValue(10000);
+    repository.create.mockResolvedValue({
+      id: "intent-deny",
+      status: IntentStatus.denied,
+    });
+
+    await expect(service.create("org-1", "member-1", dto)).rejects.toThrow(
+      PolicyDeniedException
+    );
   });
 
   it("throws when wallet missing", async () => {

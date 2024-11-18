@@ -33,9 +33,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const obj = body as Record<string, unknown>;
         message = (obj.message as string) ?? message;
         code = (obj.code as string) ?? this.codeFromStatus(status);
+        if (Array.isArray(obj.reasons)) {
+          details = { ...details, reasons: obj.reasons };
+        }
+        if (typeof obj.intentId === "string") {
+          details = { ...details, intentId: obj.intentId };
+        }
         if (Array.isArray(obj.message)) {
           message = obj.message.join(", ");
-          details = { fields: obj.message };
+          details = { ...details, fields: obj.message };
         }
       }
     } else if (exception instanceof Error) {
