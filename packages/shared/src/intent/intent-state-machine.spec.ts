@@ -58,4 +58,14 @@ describe("intent state machine", () => {
       InvalidIntentTransitionError
     );
   });
+
+  it("allows policy_evaluated to mirror draft transitions", () => {
+    expect(
+      transitionIntentStatus("policy_evaluated", policyEventFromDecision("ALLOW"))
+    ).toBe("ready_to_sign");
+  });
+
+  it("cancels from ready_to_sign", () => {
+    expect(transitionIntentStatus("ready_to_sign", "CANCELLED")).toBe("cancelled");
+  });
 });

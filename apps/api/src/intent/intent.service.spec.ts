@@ -1,5 +1,10 @@
 import { NotFoundException } from "@nestjs/common";
+import { AuditService } from "../audit/audit.service";
 import { PolicyDeniedException } from "../common/errors/policy-denied.exception";
+import {
+  InvalidIntentTransitionError,
+  transitionIntentStatus,
+} from "@wtp/shared/intent/intent-state-machine";
 import { Test } from "@nestjs/testing";
 import { IntentStatus } from "@prisma/client";
 import { PolicyEvaluationService } from "../policy/policy-evaluation.service";
@@ -30,6 +35,10 @@ describe("IntentService", () => {
   const policyResolver = {
     resolvePolicyVersionId: jest.fn().mockResolvedValue("policy-1"),
   };
+  const audit = {
+    appendIntentCreated: jest.fn(),
+    appendIntentPolicyDenied: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -41,6 +50,7 @@ describe("IntentService", () => {
         { provide: PolicyEvaluationService, useValue: policyEvaluation },
         { provide: PolicyResolverService, useValue: policyResolver },
         { provide: RateCounterService, useValue: rateCounters },
+        { provide: AuditService, useValue: audit },
       ],
     }).compile();
     service = moduleRef.get(IntentService);
@@ -128,6 +138,30 @@ describe("IntentService", () => {
     await expect(service.create("org-1", "member-1", dto)).rejects.toThrow(
       PolicyDeniedException
     );
+  });
+
+  describe("state transitions", () => {
+    it.each([
+      ["ALLOW", "ready_to_sign"],
+      ["REQUIRE_APPROVAL", "pending_approval"],
+      ["DENY", "denied"],
+    ] as const)("maps %s to %s", (decision, expected) => {
+      const status = transitionIntentStatus(
+        "draft",
+        decision === "ALLOW"
+          ? "POLICY_ALLOW"
+          : decision === "DENY"
+            ? "POLICY_DENY"
+            : "POLICY_REQUIRE_APPROVAL"
+      );
+      expect(status).toBe(expected);
+    });
+
+    it("rejects submitted transition from denied", () => {
+      expect(() => transitionIntentStatus("denied", "PROPOSED")).toThrow(
+        InvalidIntentTransitionError
+      );
+    });
   });
 
   it("throws when wallet missing", async () => {
