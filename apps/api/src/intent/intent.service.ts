@@ -9,6 +9,7 @@ import {
   policyEventFromDecision,
   transitionIntentStatus,
 } from "@wtp/shared/intent/intent-state-machine";
+import { AuditService } from "../audit/audit.service";
 import { PolicyDeniedException } from "../common/errors/policy-denied.exception";
 import { PrismaService } from "../database/prisma.service";
 import { PolicyEvaluationService } from "../policy/policy-evaluation.service";
@@ -24,7 +25,8 @@ export class IntentService {
     private readonly repository: IntentRepository,
     private readonly policyEvaluation: PolicyEvaluationService,
     private readonly policyResolver: PolicyResolverService,
-    private readonly rateCounters: RateCounterService
+    private readonly rateCounters: RateCounterService,
+    private readonly audit: AuditService
   ) {}
 
   async create(orgId: string, memberId: string, dto: CreateIntentDto) {

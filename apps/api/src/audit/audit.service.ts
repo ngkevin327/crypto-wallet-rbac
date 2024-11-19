@@ -47,6 +47,43 @@ export class AuditService {
     });
   }
 
+  async appendIntentCreated(
+    orgId: string,
+    actorId: string,
+    payload: {
+      intentId: string;
+      amountUsd: number | null;
+      tokenAddress: string;
+      decision: string;
+      reasons: string[];
+    }
+  ): Promise<void> {
+    await this.append({
+      eventType: "intent.created",
+      organizationId: orgId,
+      actorId,
+      payload,
+    });
+  }
+
+  async appendIntentPolicyDenied(
+    orgId: string,
+    actorId: string,
+    payload: {
+      intentId: string;
+      amountUsd: number | null;
+      tokenAddress: string;
+      reasons: string[];
+    }
+  ): Promise<void> {
+    await this.append({
+      eventType: "intent.policy_denied",
+      organizationId: orgId,
+      actorId,
+      payload,
+    });
+  }
+
   async appendWalletConnected(
     orgId: string,
     actorId: string,
