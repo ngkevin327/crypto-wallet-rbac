@@ -9,6 +9,7 @@ import {
   policyEventFromDecision,
   transitionIntentStatus,
 } from "@wtp/shared/intent/intent-state-machine";
+import { ApprovalService } from "../approval/approval.service";
 import { AuditService } from "../audit/audit.service";
 import { PolicyDeniedException } from "../common/errors/policy-denied.exception";
 import { PrismaService } from "../database/prisma.service";
@@ -26,7 +27,8 @@ export class IntentService {
     private readonly policyEvaluation: PolicyEvaluationService,
     private readonly policyResolver: PolicyResolverService,
     private readonly rateCounters: RateCounterService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
+    private readonly approvals: ApprovalService
   ) {}
 
   async create(orgId: string, memberId: string, dto: CreateIntentDto) {
@@ -86,9 +88,29 @@ export class IntentService {
       await this.rateCounters.incrementHourlyTx(orgId, memberId);
     }
 
+    const auditPayload = {
+      intentId: intent.id,
+      amountUsd,
+      tokenAddress: dto.tokenAddress,
+      decision: decision.decision,
+      reasons: decision.reasons,
+    };
+
     if (decision.decision === "DENY") {
+      await this.audit.appendIntentPolicyDenied(orgId, memberId, {
+        intentId: intent.id,
+        amountUsd,
+        tokenAddress: dto.tokenAddress,
+        reasons: decision.reasons,
+      });
       throw new PolicyDeniedException(decision.reasons, intent.id);
     }
+
+    if (decision.decision === "REQUIRE_APPROVAL") {
+      await this.approvals.createForIntent(intent.id, orgId, decision);
+    }
+
+    await this.audit.appendIntentCreated(orgId, memberId, auditPayload);
 
     return { intent, decision };
   }

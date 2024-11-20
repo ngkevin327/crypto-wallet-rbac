@@ -1,4 +1,5 @@
 import { NotFoundException } from "@nestjs/common";
+import { ApprovalService } from "../approval/approval.service";
 import { AuditService } from "../audit/audit.service";
 import { PolicyDeniedException } from "../common/errors/policy-denied.exception";
 import {
@@ -39,6 +40,9 @@ describe("IntentService", () => {
     appendIntentCreated: jest.fn(),
     appendIntentPolicyDenied: jest.fn(),
   };
+  const approvals = {
+    createForIntent: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -51,6 +55,7 @@ describe("IntentService", () => {
         { provide: PolicyResolverService, useValue: policyResolver },
         { provide: RateCounterService, useValue: rateCounters },
         { provide: AuditService, useValue: audit },
+        { provide: ApprovalService, useValue: approvals },
       ],
     }).compile();
     service = moduleRef.get(IntentService);
