@@ -131,11 +131,9 @@ export class ApprovalService {
         intentId,
         transitionIntentStatus("pending_approval", "APPROVAL_REJECTED")
       );
-      await this.audit.append({
-        eventType: "approval.rejected",
-        organizationId: orgId,
-        actorId: memberId,
-        payload: { requestId, intentId },
+      await this.audit.appendApprovalRejected(orgId, memberId, {
+        requestId,
+        intentId,
       });
       return this.repository.findById(requestId);
     }
@@ -149,11 +147,10 @@ export class ApprovalService {
       );
     }
 
-    await this.audit.append({
-      eventType: "approval.granted",
-      organizationId: orgId,
-      actorId: memberId,
-      payload: { requestId, intentId, approvalCount },
+    await this.audit.appendApprovalGranted(orgId, memberId, {
+      requestId,
+      intentId,
+      approvalCount,
     });
 
     return this.repository.findById(requestId);
@@ -181,10 +178,10 @@ export class ApprovalService {
       request.intentId,
       transitionIntentStatus("pending_approval", "APPROVAL_EXPIRED")
     );
-    await this.audit.append({
-      eventType: "approval.rejected",
-      organizationId: request.intent.organizationId,
-      payload: { requestId, intentId: request.intentId, reason: "expired" },
+    await this.audit.appendApprovalRejected(request.intent.organizationId, "", {
+      requestId,
+      intentId: request.intentId,
+      reason: "expired",
     });
   }
 

@@ -6,6 +6,13 @@ export const QUEUE_TX_STATUS = "tx-status";
 export const WALLET_SYNC_JOB = "sync-wallet";
 export const WALLET_SYNC_CRON = "wallet-sync-cron";
 
+export const APPROVAL_EXPIRY_JOB = "approval-expiry-sweep";
+export const APPROVAL_EXPIRY_CRON = "approval-expiry-cron";
+
+export interface ApprovalExpiryJobPayload {
+  cron?: boolean;
+}
+
 export interface WalletSyncJobPayload {
   walletId?: string;
   cron?: boolean;
