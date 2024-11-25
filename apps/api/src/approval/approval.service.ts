@@ -163,6 +163,14 @@ export class ApprovalService {
     return this.repository.findPendingForOrg(orgId);
   }
 
+  async getRequestById(requestId: string) {
+    const request = await this.repository.findById(requestId);
+    if (!request) {
+      throw new NotFoundException({ code: "APPROVAL_NOT_FOUND" });
+    }
+    return request;
+  }
+
   async expireRequest(requestId: string) {
     const request = await this.repository.findById(requestId);
     if (!request || request.status !== ApprovalRequestStatus.pending) {

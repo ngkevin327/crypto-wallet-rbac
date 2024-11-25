@@ -8,6 +8,7 @@ import { AuditModule } from "./audit/audit.module";
 import { AuthModule } from "./auth/auth.module";
 import { OrgModule } from "./org/org.module";
 import { IntegrationModule } from "./integration/integration.module";
+import { ApprovalModule } from "./approval/approval.module";
 import { IntentModule } from "./intent/intent.module";
 import { PolicyModule } from "./policy/policy.module";
 import { RolesModule } from "./roles/roles.module";
@@ -31,6 +32,7 @@ import { AppLoggerModule } from "./logger/logger.module";
     IntegrationModule,
     PolicyModule,
     IntentModule,
+    ApprovalModule,
     WalletModule,
   ],
   providers: [
