@@ -66,6 +66,32 @@ export class AuditService {
     });
   }
 
+  async appendApprovalGranted(
+    orgId: string,
+    actorId: string,
+    payload: { requestId: string; intentId: string; approvalCount: number }
+  ): Promise<void> {
+    await this.append({
+      eventType: "approval.granted",
+      organizationId: orgId,
+      actorId,
+      payload,
+    });
+  }
+
+  async appendApprovalRejected(
+    orgId: string,
+    actorId: string,
+    payload: { requestId: string; intentId: string; reason?: string }
+  ): Promise<void> {
+    await this.append({
+      eventType: "approval.rejected",
+      organizationId: orgId,
+      actorId,
+      payload,
+    });
+  }
+
   async appendIntentPolicyDenied(
     orgId: string,
     actorId: string,
