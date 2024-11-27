@@ -21,5 +21,10 @@ export default () => {
     logLevel: parsed.LOG_LEVEL,
     ethRpcUrlSepolia: process.env.ETH_RPC_URL_SEPOLIA,
     ethRpcUrlMainnet: process.env.ETH_RPC_URL_MAINNET,
+    safeTxServiceUrlSepolia: process.env.SAFE_TX_SERVICE_URL_SEPOLIA,
+    safeTxServiceUrlMainnet: process.env.SAFE_TX_SERVICE_URL_MAINNET,
+    webAppUrl: process.env.WEB_APP_URL ?? "http://localhost:3000",
+    s3Bucket: process.env.S3_BUCKET,
+    awsRegion: process.env.AWS_REGION ?? "us-east-1",
   };
 };
