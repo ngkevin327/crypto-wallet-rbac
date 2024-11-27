@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../database/prisma.service";
-import type { AppendAuditInput, AuditEventType } from "./audit-event.types";
+import type { AppendAuditInput } from "./audit-event.types";
 
 @Injectable()
 export class AuditService {

@@ -26,7 +26,11 @@ describe("ApprovalService", () => {
     member: { findMany: jest.fn() },
     roleAssignment: { findMany: jest.fn() },
   };
-  const audit = { append: jest.fn() };
+  const audit = {
+    append: jest.fn(),
+    appendApprovalGranted: jest.fn(),
+    appendApprovalRejected: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -60,19 +64,19 @@ describe("ApprovalService", () => {
   });
 
   it("fulfills quorum with two approvals", async () => {
+    const pendingRequest = {
+      id: "req-1",
+      status: ApprovalRequestStatus.pending,
+      requiredCount: 2,
+      approverRoleIds: ["role-1"],
+      intent: { id: "intent-1", organizationId: "org-1" },
+      decisions: [],
+    };
     repository.findById
+      .mockResolvedValueOnce(pendingRequest)
       .mockResolvedValueOnce({
-        id: "req-1",
-        status: ApprovalRequestStatus.pending,
-        requiredCount: 2,
-        approverRoleIds: ["role-1"],
-        intent: { id: "intent-1", organizationId: "org-1" },
-        decisions: [],
-      })
-      .mockResolvedValueOnce({
-        id: "req-1",
+        ...pendingRequest,
         status: ApprovalRequestStatus.fulfilled,
-        intent: { id: "intent-1" },
       });
     prisma.roleAssignment.findMany.mockResolvedValue([{ memberId: "m-1" }]);
     repository.hasMemberDecision.mockResolvedValue(null);
@@ -91,14 +95,20 @@ describe("ApprovalService", () => {
   });
 
   it("rejects intent on single rejection", async () => {
-    repository.findById.mockResolvedValue({
-      id: "req-1",
-      status: ApprovalRequestStatus.pending,
-      requiredCount: 2,
-      approverRoleIds: [],
-      intent: { id: "intent-1", organizationId: "org-1" },
-      decisions: [],
-    });
+    repository.findById
+      .mockResolvedValueOnce({
+        id: "req-1",
+        status: ApprovalRequestStatus.pending,
+        requiredCount: 2,
+        approverRoleIds: [],
+        intent: { id: "intent-1", organizationId: "org-1" },
+        decisions: [],
+      })
+      .mockResolvedValueOnce({
+        id: "req-1",
+        status: ApprovalRequestStatus.rejected,
+        intent: { id: "intent-1" },
+      });
     prisma.member.findMany.mockResolvedValue([{ id: "m-1" }]);
     repository.hasMemberDecision.mockResolvedValue(null);
 
@@ -127,12 +137,13 @@ describe("ApprovalService", () => {
   });
 
   it("returns 403 for ineligible approver", async () => {
-    repository.findById.mockResolvedValue({
+    repository.findById.mockResolvedValueOnce({
       id: "req-1",
       status: ApprovalRequestStatus.pending,
       requiredCount: 1,
       approverRoleIds: ["role-1"],
       intent: { organizationId: "org-1", id: "intent-1" },
+      decisions: [],
     });
     prisma.roleAssignment.findMany.mockResolvedValue([{ memberId: "m-2" }]);
     repository.hasMemberDecision.mockResolvedValue(null);

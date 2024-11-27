@@ -11,5 +11,8 @@ module.exports = {
   testEnvironment: "node",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^@wtp/shared/(.*)$": "<rootDir>/../../packages/shared/src/$1",
+    "^@wtp/policy-engine$": "<rootDir>/../../packages/policy-engine/src/index.ts",
+    "^@wtp/policy-engine/(.*)$": "<rootDir>/../../packages/policy-engine/src/$1",
   },
 };

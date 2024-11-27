@@ -109,24 +109,6 @@ describe("IntentService", () => {
     expect(rateCounters.incrementDailyUsd).not.toHaveBeenCalled();
   });
 
-  it("creates intent with denied on DENY", async () => {
-    prisma.wallet.findFirst.mockResolvedValue({ id: "wallet-1" });
-    policyEvaluation.evaluateIntent.mockResolvedValue({
-      decision: "DENY",
-      reasons: ["POLICY_DENIED_MAX_USD"],
-      matchedRules: [],
-    });
-    policyEvaluation.resolveAmountUsd.mockResolvedValue(10000);
-    repository.create.mockResolvedValue({
-      id: "intent-3",
-      status: IntentStatus.denied,
-    });
-
-    const result = await service.create("org-1", "member-1", dto);
-
-    expect(result.intent.status).toBe(IntentStatus.denied);
-  });
-
   it("throws PolicyDeniedException after persisting denied intent", async () => {
     prisma.wallet.findFirst.mockResolvedValue({ id: "wallet-1" });
     policyEvaluation.evaluateIntent.mockResolvedValue({
