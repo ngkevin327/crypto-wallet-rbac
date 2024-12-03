@@ -13,6 +13,15 @@ export interface ApprovalExpiryJobPayload {
   cron?: boolean;
 }
 
+export const TX_STATUS_JOB = "tx-status-poll";
+
+export interface TxStatusJobPayload {
+  intentId: string;
+  safeTxHash: string;
+  chainId: number;
+  attempt?: number;
+}
+
 export interface WalletSyncJobPayload {
   walletId?: string;
   cron?: boolean;
