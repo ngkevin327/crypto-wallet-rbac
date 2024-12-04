@@ -17,10 +17,11 @@ export class ApiClientError extends Error {
 export interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   token?: string | null;
+  headers?: HeadersInit;
 }
 
 function buildHeaders(options: RequestOptions): Headers {
-  const headers = new Headers(options.headers);
+  const headers = new Headers(options.headers as HeadersInit | undefined);
   if (!headers.has("Content-Type") && options.body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
