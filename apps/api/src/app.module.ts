@@ -4,6 +4,7 @@ import { AppConfigModule } from "./config/config.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
+import { IdempotencyMiddleware } from "./common/middleware/idempotency.middleware";
 import { AuditModule } from "./audit/audit.module";
 import { AuthModule } from "./auth/auth.module";
 import { OrgModule } from "./org/org.module";
@@ -43,5 +44,6 @@ import { AppLoggerModule } from "./logger/logger.module";
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer.apply(CorrelationIdMiddleware).forRoutes("*");
+    consumer.apply(IdempotencyMiddleware).forRoutes("orgs/*/intents");
   }
 }
