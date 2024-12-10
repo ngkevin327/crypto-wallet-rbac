@@ -14,6 +14,8 @@ import { IntentModule } from "./intent/intent.module";
 import { PolicyModule } from "./policy/policy.module";
 import { RolesModule } from "./roles/roles.module";
 import { WalletModule } from "./wallet/wallet.module";
+import { ApiKeysModule } from "./api-keys/api-keys.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 import { DatabaseModule } from "./database/database.module";
 import { RedisModule } from "./redis/redis.module";
 import { HealthModule } from "./health/health.module";
@@ -24,6 +26,8 @@ import { AppLoggerModule } from "./logger/logger.module";
     AppConfigModule,
     AppLoggerModule,
     AuditModule,
+    NotificationsModule,
+    ApiKeysModule,
     DatabaseModule,
     RedisModule,
     HealthModule,
