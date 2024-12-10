@@ -54,6 +54,30 @@ enum IntentStatus {
   cancelled
 }
 
+enum IntentSource {
+  web
+  api
+}
+
+enum IntentType {
+  transfer
+  deploy
+}
+
+enum RoleAssignmentStatus {
+  scheduled
+  active
+  expired
+  revoked
+}
+
+enum AuditExportJobStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
 enum ApprovalRequestStatus {
   pending
   fulfilled
@@ -75,8 +99,10 @@ model Organization {
   invites   Invite[]
   wallets   Wallet[]
   roles     Role[]
-  policies  Policy[]
-  intents   TransactionIntent[]
+  policies        Policy[]
+  intents         TransactionIntent[]
+  apiKeys         ApiKey[]
+  auditExportJobs AuditExportJob[]
 
   @@map("organizations")
 }
@@ -90,6 +116,7 @@ model Role {
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignments    RoleAssignment[]
   policies       Policy[]
+  apiKeys        ApiKey[]
 
   @@unique([organizationId, templateType])
   @@index([organizationId])
@@ -97,19 +124,21 @@ model Role {
 }
 
 model RoleAssignment {
-  id        String    @id @default(uuid()) @db.Uuid
-  memberId  String    @map("member_id") @db.Uuid
-  roleId    String    @map("role_id") @db.Uuid
-  walletId  String?   @map("wallet_id") @db.Uuid
-  startsAt  DateTime  @default(now()) @map("starts_at")
-  endsAt    DateTime? @map("ends_at")
-  createdAt DateTime  @default(now()) @map("created_at")
-  member    Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  wallet    Wallet?   @relation(fields: [walletId], references: [id], onDelete: SetNull)
+  id        String               @id @default(uuid()) @db.Uuid
+  memberId  String               @map("member_id") @db.Uuid
+  roleId    String               @map("role_id") @db.Uuid
+  walletId  String?              @map("wallet_id") @db.Uuid
+  status    RoleAssignmentStatus @default(active)
+  startsAt  DateTime             @default(now()) @map("starts_at")
+  endsAt    DateTime?            @map("ends_at")
+  createdAt DateTime             @default(now()) @map("created_at")
+  member    Member               @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  role      Role                 @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  wallet    Wallet?              @relation(fields: [walletId], references: [id], onDelete: SetNull)
 
-  @@index([memberId])
+  @@index([memberId, status])
   @@index([roleId])
+  @@index([status, endsAt])
   @@map("role_assignments")
 }
 
@@ -118,6 +147,9 @@ model TransactionIntent {
   organizationId     String       @map("organization_id") @db.Uuid
   walletId           String       @map("wallet_id") @db.Uuid
   memberId           String       @map("member_id") @db.Uuid
+  intentType         IntentType   @default(transfer) @map("intent_type")
+  source             IntentSource @default(web)
+  apiKeyId           String?      @map("api_key_id") @db.Uuid
   tokenAddress       String       @map("token_address")
   chainId            Int          @map("chain_id")
   amountNative       String       @map("amount_native")
@@ -192,14 +224,51 @@ model Wallet {
 model AuditEvent {
   id             String   @id @default(uuid()) @db.Uuid
   organizationId String?  @map("organization_id") @db.Uuid
+  partitionKey   String   @map("partition_key") @db.VarChar(7)
   eventType      String   @map("event_type")
   actorId        String?  @map("actor_id") @db.Uuid
   payload        Json     @default("{}")
   createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([organizationId, createdAt(sort: Desc)])
-  @@index([eventType, createdAt])
+  @@index([organizationId, eventType, createdAt(sort: Desc)])
+  @@index([partitionKey, createdAt(sort: Desc)])
   @@map("audit_events")
+}
+
+model AuditExportJob {
+  id             String               @id @default(uuid()) @db.Uuid
+  organizationId String               @map("organization_id") @db.Uuid
+  status         AuditExportJobStatus @default(pending)
+  fromDate       DateTime             @map("from_date")
+  toDate         DateTime             @map("to_date")
+  s3Key          String?              @map("s3_key")
+  rowCount       Int?                 @map("row_count")
+  errorMessage   String?              @map("error_message")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  completedAt    DateTime?            @map("completed_at")
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@map("audit_export_jobs")
+}
+
+model ApiKey {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  name           String
+  keyPrefix      String    @map("key_prefix")
+  keyHash        String    @map("key_hash")
+  roleId         String    @map("role_id") @db.Uuid
+  lastUsedAt     DateTime? @map("last_used_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, revokedAt])
+  @@index([keyPrefix])
+  @@map("api_keys")
 }
 
 model Member {
@@ -261,14 +330,16 @@ model Session {
 }
 
 model ApprovalRequest {
-  id              String                @id @default(uuid()) @db.Uuid
-  intentId        String                @map("intent_id") @db.Uuid
-  requiredCount   Int                   @map("required_count")
-  approverRoleIds String[]              @default([]) @map("approver_role_ids")
-  status          ApprovalRequestStatus @default(pending)
-  expiresAt       DateTime              @map("expires_at")
-  createdAt       DateTime              @default(now()) @map("created_at")
-  updatedAt       DateTime              @updatedAt @map("updated_at")
+  id                 String                @id @default(uuid()) @db.Uuid
+  intentId           String                @map("intent_id") @db.Uuid
+  requiredCount      Int                   @map("required_count")
+  approverRoleIds    String[]              @default([]) @map("approver_role_ids")
+  status             ApprovalRequestStatus @default(pending)
+  expiresAt          DateTime              @map("expires_at")
+  reminder24hSentAt  DateTime?             @map("reminder_24h_sent_at")
+  reminder72hSentAt  DateTime?             @map("reminder_72h_sent_at")
+  createdAt          DateTime              @default(now()) @map("created_at")
+  updatedAt          DateTime              @updatedAt @map("updated_at")
   intent          TransactionIntent     @relation(fields: [intentId], references: [id], onDelete: Cascade)
   decisions       ApprovalDecision[]
 
