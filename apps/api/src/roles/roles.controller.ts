@@ -4,6 +4,7 @@ import { CurrentUser, type RequestUser } from "../auth/decorators/current-user.d
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
 import { AssignRoleDto } from "./dto/assign-role.dto";
+import { RoleAssignmentService } from "./role-assignment.service";
 import { RolesService } from "./roles.service";
 
 @ApiTags("roles")
@@ -11,7 +12,10 @@ import { RolesService } from "./roles.service";
 @Controller("orgs/:orgId")
 @UseGuards(JwtAuthGuard, OrgMemberGuard)
 export class RolesController {
-  constructor(private readonly roles: RolesService) {}
+  constructor(
+    private readonly roles: RolesService,
+    private readonly assignments: RoleAssignmentService
+  ) {}
 
   @Get("roles")
   @ApiOperation({ summary: "List role templates for an organization" })
@@ -33,7 +37,17 @@ export class RolesController {
     @CurrentUser() user: RequestUser,
     @Body() dto: AssignRoleDto
   ) {
-    return this.roles.assignRole(orgId, memberId, dto.roleId, dto.walletId, user.userId);
+    return this.assignments.assign(
+      orgId,
+      memberId,
+      {
+        roleId: dto.roleId,
+        walletId: dto.walletId,
+        startsAt: dto.startsAt ? new Date(dto.startsAt) : undefined,
+        endsAt: dto.endsAt ? new Date(dto.endsAt) : undefined,
+      },
+      user.userId
+    );
   }
 
   @Delete("members/:memberId/roles/:assignmentId")
@@ -44,6 +58,6 @@ export class RolesController {
     @Param("assignmentId") assignmentId: string,
     @CurrentUser() user: RequestUser
   ) {
-    return this.roles.revokeRole(orgId, memberId, assignmentId, user.userId);
+    return this.assignments.revoke(orgId, memberId, assignmentId, user.userId);
   }
 }
