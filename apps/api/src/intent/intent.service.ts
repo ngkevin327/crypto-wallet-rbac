@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { IntentStatus, MemberStatus, Prisma } from "@prisma/client";
+import { IntentSource, IntentStatus, IntentType, MemberStatus, Prisma } from "@prisma/client";
 import type { PolicyDecision } from "@wtp/policy-engine";
 import {
   policyEventFromDecision,
@@ -31,7 +31,15 @@ export class IntentService {
     private readonly approvals: ApprovalService
   ) {}
 
-  async create(orgId: string, memberId: string, dto: CreateIntentDto) {
+  async create(
+    orgId: string,
+    memberId: string,
+    dto: CreateIntentDto,
+    meta?: { source?: IntentSource; apiKeyId?: string }
+  ) {
+    const intentType: IntentType =
+      dto.type === "deploy" ? IntentType.deploy : IntentType.transfer;
+
     const wallet = await this.prisma.wallet.findFirst({
       where: { id: dto.walletId, organizationId: orgId },
     });
@@ -42,20 +50,38 @@ export class IntentService {
       });
     }
 
+    const tokenAddress =
+      intentType === IntentType.deploy
+        ? "0x0000000000000000000000000000000000000000"
+        : (dto.tokenAddress as string);
+    const amountNative = intentType === IntentType.deploy ? "0" : (dto.amountNative as string);
+    const toAddress =
+      intentType === IntentType.deploy
+        ? "0x0000000000000000000000000000000000000000"
+        : (dto.toAddress as string);
+    const calldata =
+      intentType === IntentType.deploy
+        ? (dto.bytecode ?? dto.calldata ?? "0x")
+        : (dto.calldata ?? null);
+
     const decision = await this.policyEvaluation.evaluateIntent({
       orgId,
       memberId,
       walletId: dto.walletId,
-      tokenAddress: dto.tokenAddress,
+      tokenAddress,
       chainId: dto.chainId,
-      amountNative: dto.amountNative,
+      amountNative,
+      intentAction: intentType === IntentType.deploy ? "deploy" : "transfer",
     });
 
-    const amountUsd = await this.policyEvaluation.resolveAmountUsd(
-      dto.chainId,
-      dto.tokenAddress,
-      dto.amountNative
-    );
+    const amountUsd =
+      intentType === IntentType.deploy
+        ? 0
+        : await this.policyEvaluation.resolveAmountUsd(
+            dto.chainId,
+            tokenAddress,
+            amountNative
+          );
 
     const status = transitionIntentStatus(
       "draft",
@@ -72,12 +98,15 @@ export class IntentService {
       organizationId: orgId,
       walletId: dto.walletId,
       memberId,
-      tokenAddress: dto.tokenAddress,
+      intentType,
+      source: meta?.source ?? IntentSource.web,
+      apiKeyId: meta?.apiKeyId ?? null,
+      tokenAddress,
       chainId: dto.chainId,
-      amountNative: dto.amountNative,
+      amountNative,
       amountUsd,
-      toAddress: dto.toAddress,
-      calldata: dto.calldata ?? null,
+      toAddress,
+      calldata,
       status,
       policyVersionId,
       policyDecisionJson: IntentService.decisionSnapshot(decision),
@@ -90,17 +119,19 @@ export class IntentService {
 
     const auditPayload = {
       intentId: intent.id,
+      intentType,
       amountUsd,
-      tokenAddress: dto.tokenAddress,
+      tokenAddress,
       decision: decision.decision,
       reasons: decision.reasons,
+      ...(meta?.apiKeyId ? { apiKeyId: meta.apiKeyId } : {}),
     };
 
     if (decision.decision === "DENY") {
       await this.audit.appendIntentPolicyDenied(orgId, memberId, {
         intentId: intent.id,
         amountUsd,
-        tokenAddress: dto.tokenAddress,
+        tokenAddress,
         reasons: decision.reasons,
       });
       throw new PolicyDeniedException(decision.reasons, intent.id);
@@ -141,6 +172,25 @@ export class IntentService {
     filters: { status?: IntentStatus; memberId?: string }
   ) {
     return this.repository.findByOrg(orgId, filters);
+  }
+
+  async cancelByMember(memberId: string, reason: string): Promise<number> {
+    const cancellable: IntentStatus[] = [
+      IntentStatus.pending_approval,
+      IntentStatus.ready_to_sign,
+      IntentStatus.policy_evaluated,
+    ];
+    const result = await this.prisma.transactionIntent.updateMany({
+      where: {
+        memberId,
+        status: { in: cancellable },
+      },
+      data: {
+        status: IntentStatus.cancelled,
+        failureReason: reason,
+      },
+    });
+    return result.count;
   }
 
   static decisionSnapshot(decision: PolicyDecision): Prisma.InputJsonValue {
