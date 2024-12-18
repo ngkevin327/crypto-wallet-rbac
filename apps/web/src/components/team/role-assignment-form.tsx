@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { RoleRecord } from "@/lib/api/policies";
 import { assignRole } from "@/lib/api/members";
+import { TemporaryAccessFields } from "./temporary-access-fields";
 
 interface Props {
   token: string;
@@ -15,13 +16,17 @@ interface Props {
 export function RoleAssignmentForm({ token, orgId, memberId, roles, onAssigned }: Props) {
   const [roleId, setRoleId] = useState(roles[0]?.id ?? "");
   const [loading, setLoading] = useState(false);
+  const [temp, setTemp] = useState({ enabled: false, startsAt: "", endsAt: "" });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!roleId) return;
     setLoading(true);
     try {
-      await assignRole(token, orgId, memberId, roleId);
+      await assignRole(token, orgId, memberId, roleId, {
+        startsAt: temp.enabled ? new Date(temp.startsAt).toISOString() : undefined,
+        endsAt: temp.enabled ? new Date(temp.endsAt).toISOString() : undefined,
+      });
       onAssigned();
     } finally {
       setLoading(false);
@@ -29,7 +34,9 @@ export function RoleAssignmentForm({ token, orgId, memberId, roles, onAssigned }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 items-end">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <TemporaryAccessFields {...temp} onChange={setTemp} />
+      <div className="flex gap-2 items-end">
       <div className="flex-1">
         <label className="block text-xs text-slate-500 mb-1">Assign role</label>
         <select
@@ -51,6 +58,7 @@ export function RoleAssignmentForm({ token, orgId, memberId, roles, onAssigned }
       >
         Assign
       </button>
+      </div>
     </form>
   );
 }

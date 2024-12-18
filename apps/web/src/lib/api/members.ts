@@ -4,6 +4,9 @@ export interface RoleAssignment {
   id: string;
   role: { id: string; name: string; templateType: string };
   walletId: string | null;
+  startsAt?: string;
+  endsAt?: string | null;
+  status?: string;
 }
 
 export function listMemberRoles(token: string, orgId: string, memberId: string) {
@@ -15,12 +18,12 @@ export function assignRole(
   orgId: string,
   memberId: string,
   roleId: string,
-  walletId?: string
+  opts?: { walletId?: string; startsAt?: string; endsAt?: string }
 ) {
-  return apiRequest(`/orgs/${orgId}/members/${memberId}/roles`, {
+  return apiRequest<RoleAssignment>(`/orgs/${orgId}/members/${memberId}/roles`, {
     method: "POST",
     token,
-    body: { roleId, walletId },
+    body: { roleId, walletId: opts?.walletId, startsAt: opts?.startsAt, endsAt: opts?.endsAt },
   });
 }
 
