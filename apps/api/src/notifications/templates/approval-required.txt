@@ -1,0 +1,5 @@
+An approval is required for transaction intent {{intentId}} in {{orgName}}.
+
+Review and decide: {{approvalUrl}}
+
+Required approvals: {{requiredCount}}
