@@ -8,6 +8,7 @@ import {
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
 import { ApprovalRepository } from "./approval.repository";
+import { NotificationDispatcherService } from "../notifications/notification-dispatcher.service";
 import { ApprovalService } from "./approval.service";
 
 describe("ApprovalService", () => {
@@ -31,6 +32,9 @@ describe("ApprovalService", () => {
     appendApprovalGranted: jest.fn(),
     appendApprovalRejected: jest.fn(),
   };
+  const notifications = {
+    notifyApproversForIntent: jest.fn().mockResolvedValue(undefined),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -40,6 +44,7 @@ describe("ApprovalService", () => {
         { provide: ApprovalRepository, useValue: repository },
         { provide: PrismaService, useValue: prisma },
         { provide: AuditService, useValue: audit },
+        { provide: NotificationDispatcherService, useValue: notifications },
       ],
     }).compile();
     service = moduleRef.get(ApprovalService);

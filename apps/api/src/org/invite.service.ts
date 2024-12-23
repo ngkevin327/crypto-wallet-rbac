@@ -9,13 +9,13 @@ import { InviteStatus, MemberStatus, PlatformRole } from "@prisma/client";
 import { createHash, randomBytes } from "crypto";
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
-import { EmailPort } from "../notifications/email.port";
+import { NotificationDispatcherService } from "../notifications/notification-dispatcher.service";
 
 @Injectable()
 export class InviteService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly email: EmailPort,
+    private readonly notifications: NotificationDispatcherService,
     private readonly audit: AuditService
   ) {}
 
@@ -61,12 +61,12 @@ export class InviteService {
       },
     });
 
-    const webUrl = process.env.WEB_APP_URL ?? "http://localhost:3000";
-    await this.email.send({
-      to: normalized,
-      subject: "You are invited to Wallet Team Permissions",
-      text: `Accept your invite: ${webUrl}/invite?token=${rawToken}`,
-    });
+    const org = await this.prisma.organization.findUnique({ where: { id: orgId } });
+    await this.notifications.sendInviteEmail(
+      normalized,
+      org?.name ?? "your organization",
+      rawToken
+    );
 
     await this.audit.appendMemberInvited(orgId, invitedByUserId, normalized, invite.id);
 

@@ -14,6 +14,7 @@ import type { PolicyDecision } from "@wtp/policy-engine";
 import { transitionIntentStatus } from "@wtp/shared/intent/intent-state-machine";
 import { AuditService } from "../audit/audit.service";
 import { PrismaService } from "../database/prisma.service";
+import { NotificationDispatcherService } from "../notifications/notification-dispatcher.service";
 import { isQuorumMet } from "./approval-quorum.calculator";
 import { ApprovalRepository } from "./approval.repository";
 
@@ -24,7 +25,8 @@ export class ApprovalService {
   constructor(
     private readonly repository: ApprovalRepository,
     private readonly prisma: PrismaService,
-    private readonly audit: AuditService
+    private readonly audit: AuditService,
+    private readonly notifications: NotificationDispatcherService
   ) {}
 
   async createForIntent(
@@ -65,6 +67,17 @@ export class ApprovalService {
       },
     });
 
+    const approverMemberIds = await this.resolveEligibleApproverMemberIds(
+      organizationId,
+      approverRoleIds
+    );
+    await this.notifications.notifyApproversForIntent(
+      organizationId,
+      intentId,
+      approverMemberIds,
+      approval.approverCount
+    );
+
     return request;
   }
 
@@ -84,6 +97,7 @@ export class ApprovalService {
     const assignments = await this.prisma.roleAssignment.findMany({
       where: {
         roleId: { in: approverRoleIds },
+        status: "active",
         member: { organizationId: orgId, status: MemberStatus.active },
         startsAt: { lte: now },
         OR: [{ endsAt: null }, { endsAt: { gt: now } }],

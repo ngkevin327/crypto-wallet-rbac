@@ -1,8 +1,7 @@
 import { Module } from "@nestjs/common";
 import { PolicyTemplateSeedService } from "../roles/policy-template-seed.service";
 import { RolesModule } from "../roles/roles.module";
-import { ConsoleEmailAdapter } from "../notifications/console-email.adapter";
-import { EmailPort } from "../notifications/email.port";
+import { NotificationsModule } from "../notifications/notifications.module";
 import { InviteController } from "./invite.controller";
 import { InviteService } from "./invite.service";
 import { OrgController } from "./org.controller";
@@ -11,7 +10,7 @@ import { SetupStatusService } from "./setup-status.service";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
 
 @Module({
-  imports: [RolesModule],
+  imports: [RolesModule, NotificationsModule],
   controllers: [OrgController, InviteController],
   providers: [
     OrgService,
@@ -19,7 +18,6 @@ import { OrgMemberGuard } from "../common/guards/org-member.guard";
     OrgMemberGuard,
     PolicyTemplateSeedService,
     SetupStatusService,
-    { provide: EmailPort, useClass: ConsoleEmailAdapter },
   ],
   exports: [OrgService, InviteService],
 })
