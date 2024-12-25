@@ -16,10 +16,24 @@ export class OrgMemberGuard implements CanActivate {
       user?: { userId: string };
       params?: { orgId?: string };
       orgId?: string;
+      apiKeyContext?: { orgId: string; memberId: string };
+      memberId?: string;
     }>();
-    const userId = request.user?.userId;
     const orgId = request.params?.orgId ?? request.orgId;
-    if (!userId || !orgId) {
+    if (!orgId) {
+      throw new ForbiddenException({ code: "ORG_ACCESS_DENIED" });
+    }
+
+    if (request.apiKeyContext) {
+      if (request.apiKeyContext.orgId !== orgId) {
+        throw new ForbiddenException({ code: "ORG_ACCESS_DENIED" });
+      }
+      request.memberId = request.apiKeyContext.memberId;
+      return true;
+    }
+
+    const userId = request.user?.userId;
+    if (!userId) {
       throw new ForbiddenException({ code: "ORG_ACCESS_DENIED" });
     }
     const member = await this.prisma.member.findFirst({
