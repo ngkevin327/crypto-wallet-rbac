@@ -6,6 +6,9 @@ export interface CreateIntentRecord {
   organizationId: string;
   walletId: string;
   memberId: string;
+  intentType?: "transfer" | "deploy";
+  source?: "web" | "api";
+  apiKeyId?: string | null;
   tokenAddress: string;
   chainId: number;
   amountNative: string;

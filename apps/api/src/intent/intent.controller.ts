@@ -13,6 +13,11 @@ import { IntentStatus } from "@prisma/client";
 import { IsOptional, IsString, Matches } from "class-validator";
 import { CurrentUser, type RequestUser } from "../auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { JwtOrApiKeyGuard } from "../auth/guards/jwt-or-api-key.guard";
+import {
+  ApiKeyContextParam,
+  type ApiKeyContext,
+} from "../common/decorators/api-key-context.decorator";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
 import { CreateIntentDto } from "./dto/create-intent.dto";
 import { toIntentResponse } from "./intent.mapper";
@@ -42,14 +47,18 @@ export class IntentController {
   ) {}
 
   @Post("orgs/:orgId/intents")
-  @UseGuards(OrgMemberGuard)
-  @ApiOperation({ summary: "Create a transfer intent" })
+  @UseGuards(JwtOrApiKeyGuard, OrgMemberGuard)
+  @ApiOperation({ summary: "Create a transfer or deploy intent (JWT or API key)" })
   async create(
     @Param("orgId") orgId: string,
-    @Req() req: { memberId: string },
-    @Body() dto: CreateIntentDto
+    @Req() req: { memberId: string; intentSource?: string },
+    @Body() dto: CreateIntentDto,
+    @ApiKeyContextParam() apiKey?: ApiKeyContext
   ) {
-    const { intent } = await this.intents.create(orgId, req.memberId, dto);
+    const { intent } = await this.intents.create(orgId, req.memberId, dto, {
+      source: apiKey ? "api" : (req.intentSource === "api" ? "api" : "web"),
+      apiKeyId: apiKey?.keyId,
+    });
     return toIntentResponse(intent);
   }
 

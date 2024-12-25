@@ -1,4 +1,8 @@
 import { Module } from "@nestjs/common";
+import { ApiKeysModule } from "../api-keys/api-keys.module";
+import { AuthModule } from "../auth/auth.module";
+import { ApiKeyAuthGuard } from "../auth/guards/api-key-auth.guard";
+import { JwtOrApiKeyGuard } from "../auth/guards/jwt-or-api-key.guard";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
 import { ApprovalModule } from "../approval/approval.module";
 import { PolicyModule } from "../policy/policy.module";
@@ -12,7 +16,7 @@ import { IntentService } from "./intent.service";
 import { SafePayloadBuilder } from "./safe-payload.builder";
 
 @Module({
-  imports: [PolicyModule, ApprovalModule, WalletModule, BullMqModule],
+  imports: [PolicyModule, ApprovalModule, WalletModule, BullMqModule, ApiKeysModule, AuthModule],
   controllers: [IntentController],
   providers: [
     IntentRepository,
@@ -21,6 +25,8 @@ import { SafePayloadBuilder } from "./safe-payload.builder";
     SafePayloadBuilder,
     TxStatusQueue,
     OrgMemberGuard,
+    JwtOrApiKeyGuard,
+    ApiKeyAuthGuard,
   ],
   exports: [IntentService, IntentRepository, IntentExecutionService],
 })
