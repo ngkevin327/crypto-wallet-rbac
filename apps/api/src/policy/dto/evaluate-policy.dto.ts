@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsString, IsUUID, Matches, Min } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Min } from "class-validator";
 
 export class EvaluatePolicyDto {
   @ApiProperty()
@@ -27,4 +27,9 @@ export class EvaluatePolicyDto {
   @ApiProperty({ description: "Token amount in native units (e.g. 1000000 for 1 USDC)" })
   @IsString()
   amountNative!: string;
+
+  @ApiPropertyOptional({ enum: ["transfer", "deploy"], default: "transfer" })
+  @IsOptional()
+  @IsIn(["transfer", "deploy"])
+  intentAction?: "transfer" | "deploy";
 }

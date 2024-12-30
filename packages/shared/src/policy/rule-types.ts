@@ -10,7 +10,10 @@ export const POLICY_RULE_TYPES = [
   "max_usd_per_day",
   "max_transactions_per_hour",
   "require_approval",
+  "action_allowlist",
 ] as const;
+
+export type IntentAction = "transfer" | "deploy";
 
 export type PolicyRuleType = (typeof POLICY_RULE_TYPES)[number];
 
@@ -52,13 +55,20 @@ export interface RequireApprovalRule extends PolicyRuleBase {
   approverRoleIds?: string[];
 }
 
+export interface ActionAllowlistRule extends PolicyRuleBase {
+  type: "action_allowlist";
+  /** Permitted intent actions for this role. */
+  actions: IntentAction[];
+}
+
 export type PolicyRule =
   | TokenAllowlistRule
   | WalletAllowlistRule
   | MaxUsdPerTransactionRule
   | MaxUsdPerDayRule
   | MaxTransactionsPerHourRule
-  | RequireApprovalRule;
+  | RequireApprovalRule
+  | ActionAllowlistRule;
 
 export interface PolicyRulesBundle {
   rules: PolicyRule[];
@@ -82,6 +92,8 @@ export function ruleTypeLabel(type: PolicyRuleType): string {
       return "Max transactions per hour";
     case "require_approval":
       return "Require approval";
+    case "action_allowlist":
+      return "Action allowlist";
     default:
       return type;
   }

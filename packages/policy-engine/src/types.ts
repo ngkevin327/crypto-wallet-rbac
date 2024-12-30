@@ -7,6 +7,8 @@ export interface RateCounters {
   txCountLastHour: number;
 }
 
+export type IntentAction = "transfer" | "deploy";
+
 export interface EvaluationContext {
   orgId: string;
   memberId: string;
@@ -16,6 +18,7 @@ export interface EvaluationContext {
   amountUsd: number | null;
   counters: RateCounters;
   actorRoleIds: string[];
+  intentAction?: IntentAction;
 }
 
 export interface ApprovalRequirement {

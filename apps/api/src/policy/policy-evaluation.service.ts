@@ -59,6 +59,7 @@ export class PolicyEvaluationService {
       amountUsd,
       counters: counterSnapshot,
       actorRoleIds: [],
+      intentAction: dto.intentAction ?? "transfer",
     };
 
     return this.evaluator.evaluate(context, rules);

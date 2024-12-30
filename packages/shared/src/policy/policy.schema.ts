@@ -48,6 +48,13 @@ const requireApprovalRuleSchema = z.object({
   approverRoleIds: z.array(uuid).min(1).optional(),
 });
 
+const intentActionSchema = z.enum(["transfer", "deploy"]);
+
+const actionAllowlistRuleSchema = z.object({
+  type: z.literal("action_allowlist"),
+  actions: z.array(intentActionSchema).min(1, "At least one action is required"),
+});
+
 export const policyRuleSchema = z.discriminatedUnion("type", [
   tokenAllowlistRuleSchema,
   walletAllowlistRuleSchema,
@@ -55,6 +62,7 @@ export const policyRuleSchema = z.discriminatedUnion("type", [
   maxUsdPerDayRuleSchema,
   maxTransactionsPerHourRuleSchema,
   requireApprovalRuleSchema,
+  actionAllowlistRuleSchema,
 ]);
 
 export const PolicyRulesSchema = z
