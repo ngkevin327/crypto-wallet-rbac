@@ -12,6 +12,7 @@ const NAV = [
   { href: "/dashboard/intents/new", label: "New transfer" },
   { href: "/dashboard/approvals", label: "Approvals" },
   { href: "/dashboard/audit", label: "Audit" },
+  { href: "/dashboard/settings/api-keys", label: "API keys" },
 ];
 
 export function Sidebar() {
