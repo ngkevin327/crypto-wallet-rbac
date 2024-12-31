@@ -90,8 +90,14 @@ export class IntentExecutionService {
           payload: { intentId, failureReason: classified.failureReason },
         });
       }
-      throw err;
+      throw new HttpException(
+        {
+          code: classified.retryable ? "SAFE_API_RETRYABLE" : "SAFE_API_ERROR",
+          message: classified.failureReason,
+          retryable: classified.retryable,
+        },
+        classified.retryable ? 503 : 400
+      );
     }
   }
-
 }
