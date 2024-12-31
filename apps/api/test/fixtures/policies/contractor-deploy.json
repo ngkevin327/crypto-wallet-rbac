@@ -1,0 +1,14 @@
+{
+  "name": "Contractor deploy window",
+  "description": "Temporary deploy-only access for operations contractors",
+  "rules": [
+    {
+      "type": "action_allowlist",
+      "actions": ["deploy"]
+    },
+    {
+      "type": "wallet_allowlist",
+      "walletIds": ["{{walletId}}"]
+    }
+  ]
+}
