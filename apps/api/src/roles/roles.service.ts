@@ -130,7 +130,7 @@ export class RolesService {
       where: {
         memberId,
         member: { organizationId: orgId },
-        endsAt: null,
+        status: { in: ["scheduled", "active"] },
       },
       include: { role: true, wallet: true },
       orderBy: { createdAt: "desc" },

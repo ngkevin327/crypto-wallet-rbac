@@ -11,12 +11,15 @@ export class AuditService {
 
   async append(input: AppendAuditInput): Promise<void> {
     const payload = this.sanitizePayload(input.payload ?? {});
+    const createdAt = new Date();
     await this.prisma.auditEvent.create({
       data: {
         organizationId: input.organizationId ?? null,
+        partitionKey: AuditService.partitionKeyFor(createdAt),
         eventType: input.eventType,
         actorId: input.actorId ?? null,
         payload: payload as Prisma.InputJsonValue,
+        createdAt,
       },
     });
     this.logger.debug(
@@ -123,6 +126,12 @@ export class AuditService {
       actorId,
       payload: { walletId, address, chainId },
     });
+  }
+
+  static partitionKeyFor(date: Date): string {
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    return `${y}-${m}`;
   }
 
   private sanitizePayload(payload: Record<string, unknown>): Record<string, unknown> {

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { MemberStatus } from "@prisma/client";
+import { MemberStatus, RoleAssignmentStatus } from "@prisma/client";
 import { PrismaService } from "../database/prisma.service";
 
 @Injectable()
@@ -11,6 +11,7 @@ export class RoleAssignmentRepository {
     return this.prisma.roleAssignment.findMany({
       where: {
         memberId,
+        status: RoleAssignmentStatus.active,
         member: { status: MemberStatus.active },
         startsAt: { lte: now },
         OR: [{ endsAt: null }, { endsAt: { gt: now } }],
