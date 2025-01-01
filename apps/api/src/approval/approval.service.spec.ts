@@ -53,6 +53,7 @@ describe("ApprovalService", () => {
   it("creates approval request for REQUIRE_APPROVAL decision", async () => {
     repository.createRequest.mockResolvedValue({ id: "req-1" });
     repository.updateIntentStatus.mockResolvedValue({});
+    prisma.roleAssignment.findMany.mockResolvedValue([{ memberId: "m-1" }]);
 
     const result = await service.createForIntent("intent-1", "org-1", {
       decision: "REQUIRE_APPROVAL",
