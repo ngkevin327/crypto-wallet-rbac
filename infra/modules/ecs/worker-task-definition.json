@@ -1,0 +1,19 @@
+[
+  {
+    "name": "worker",
+    "image": "${image}",
+    "essential": true,
+    "command": ["node", "dist/worker.js"],
+    "environment": [
+      { "name": "NODE_ENV", "value": "production" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/wtp/worker",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "worker"
+      }
+    }
+  }
+]
