@@ -1,0 +1,51 @@
+name: Deploy production
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build API image
+        run: |
+          docker build -f apps/api/Dockerfile -t ${{ secrets.ECR_API_REPO }}:${{ github.ref_name }} .
+          docker push ${{ secrets.ECR_API_REPO }}:${{ github.ref_name }}
+
+      - name: Build worker image
+        run: |
+          docker build -f apps/api/worker.Dockerfile -t ${{ secrets.ECR_WORKER_REPO }}:${{ github.ref_name }} .
+          docker push ${{ secrets.ECR_WORKER_REPO }}:${{ github.ref_name }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform apply
+        working-directory: infra/environments/production
+        run: |
+          terraform init -input=false
+          terraform apply -auto-approve -input=false
+
+      - name: Smoke test
+        run: |
+          curl -fsS "https://api.wtp.example.com/v1/health" || exit 1
