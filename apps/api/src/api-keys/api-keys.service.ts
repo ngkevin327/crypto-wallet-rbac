@@ -119,6 +119,7 @@ export class ApiKeysService {
           keyId: candidate.id,
           orgId: candidate.organizationId,
           roleId: candidate.roleId,
+          ipAllowlist: candidate.ipAllowlist,
         };
       }
     }

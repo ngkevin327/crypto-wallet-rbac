@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { APP_FILTER, APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
+import { GlobalRateLimitGuard } from "./common/guards/global-rate-limit.guard";
 import { AppConfigModule } from "./config/config.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { RequestLoggingInterceptor } from "./common/interceptors/request-logging.interceptor";
@@ -20,11 +21,13 @@ import { DatabaseModule } from "./database/database.module";
 import { RedisModule } from "./redis/redis.module";
 import { HealthModule } from "./health/health.module";
 import { AppLoggerModule } from "./logger/logger.module";
+import { ObservabilityModule } from "./observability/observability.module";
 
 @Module({
   imports: [
     AppConfigModule,
     AppLoggerModule,
+    ObservabilityModule,
     AuditModule,
     NotificationsModule,
     ApiKeysModule,
@@ -42,6 +45,7 @@ import { AppLoggerModule } from "./logger/logger.module";
   ],
   providers: [
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
+    { provide: APP_GUARD, useClass: GlobalRateLimitGuard },
     { provide: APP_INTERCEPTOR, useClass: RequestLoggingInterceptor },
   ],
 })

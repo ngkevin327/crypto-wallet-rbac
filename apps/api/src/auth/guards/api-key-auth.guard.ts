@@ -1,6 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -22,7 +23,8 @@ export class ApiKeyAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
-      headers: { authorization?: string };
+      headers: { authorization?: string; "x-forwarded-for"?: string };
+      ip?: string;
       params?: { orgId?: string };
       apiKeyContext?: ApiKeyContext;
       memberId?: string;
@@ -45,6 +47,10 @@ export class ApiKeyAuthGuard implements CanActivate {
     }
 
     this.enforceRateLimit(validated.keyId);
+    this.enforceIpAllowlist(
+      validated.ipAllowlist,
+      request.headers["x-forwarded-for"]?.split(",")[0]?.trim() ?? request.ip
+    );
 
     const routeOrgId = request.params?.orgId;
     if (routeOrgId && routeOrgId !== validated.orgId) {
@@ -79,6 +85,15 @@ export class ApiKeyAuthGuard implements CanActivate {
     request.memberId = assignment.memberId;
     request.intentSource = "api";
     return true;
+  }
+
+  private enforceIpAllowlist(allowlist: string[], clientIp?: string): void {
+    if (!allowlist.length) {
+      return;
+    }
+    if (!clientIp || !allowlist.includes(clientIp)) {
+      throw new ForbiddenException({ code: "IP_NOT_ALLOWED" });
+    }
   }
 
   private enforceRateLimit(keyId: string): void {

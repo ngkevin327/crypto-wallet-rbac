@@ -260,6 +260,7 @@ model ApiKey {
   keyPrefix      String    @map("key_prefix")
   keyHash        String    @map("key_hash")
   roleId         String    @map("role_id") @db.Uuid
+  ipAllowlist    String[]  @default([]) @map("ip_allowlist")
   lastUsedAt     DateTime? @map("last_used_at")
   revokedAt      DateTime? @map("revoked_at")
   createdAt      DateTime  @default(now()) @map("created_at")
