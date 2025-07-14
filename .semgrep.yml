@@ -1,0 +1,16 @@
+rules:
+  - id: wtp-nestjs-injection
+    patterns:
+      - pattern: |
+          eval(...)
+    message: Avoid eval in application code
+    languages: [typescript]
+    severity: ERROR
+
+  - id: wtp-hardcoded-secret
+    patterns:
+      - pattern: |
+          $X = "wtp_live_..."
+    message: Possible hardcoded API key material
+    languages: [typescript]
+    severity: WARNING
