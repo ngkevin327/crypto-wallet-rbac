@@ -116,9 +116,9 @@ export class AuthController {
   private setRefreshCookie(res: Response, refreshToken: string): void {
     res.cookie(REFRESH_COOKIE, refreshToken, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
-      path: "/v1/auth",
+      path: "/v1/auth/refresh",
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
   }

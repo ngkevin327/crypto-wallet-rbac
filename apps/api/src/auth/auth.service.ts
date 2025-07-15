@@ -12,8 +12,13 @@ import { PasswordService } from "./password.service";
 import { MfaService } from "./mfa.service";
 import { UsersRepository } from "../users/users.repository";
 
+const LOCKOUT_THRESHOLD = 10;
+const LOCKOUT_MS = 15 * 60 * 1000;
+
 @Injectable()
 export class AuthService {
+  private readonly failedLogins = new Map<string, { count: number; lockedUntil?: number }>();
+
   constructor(
     private readonly users: UsersRepository,
     private readonly passwords: PasswordService,
@@ -41,8 +46,10 @@ export class AuthService {
     password: string,
     meta?: { userAgent?: string; ip?: string }
   ): Promise<import("./auth.types").LoginResult> {
+    this.assertNotLocked(email);
     const user = await this.users.findByEmail(email);
     if (!user) {
+      this.recordFailedLogin(email);
       throw new UnauthorizedException({
         code: "INVALID_CREDENTIALS",
         message: "Invalid email or password",
@@ -50,11 +57,13 @@ export class AuthService {
     }
     const valid = await this.passwords.verify(user.passwordHash, password);
     if (!valid) {
+      this.recordFailedLogin(email);
       throw new UnauthorizedException({
         code: "INVALID_CREDENTIALS",
         message: "Invalid email or password",
       });
     }
+    this.failedLogins.delete(email);
 
     if (user.mfaEnabled && user.mfaSecret) {
       const challengeToken = await this.jwt.signAsync(
@@ -138,7 +147,7 @@ export class AuthService {
       { sub: userId, email },
       {
         secret: this.config.get<string>("jwtAccessSecret") ?? "dev-secret-min-16-chars",
-        expiresIn: this.config.get<string>("JWT_ACCESS_TTL") ?? "24h",
+        expiresIn: this.config.get<string>("JWT_ACCESS_TTL") ?? "15m",
       }
     );
 
@@ -160,11 +169,31 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: this.config.get<string>("JWT_ACCESS_TTL") ?? "24h",
+      expiresIn: this.config.get<string>("JWT_ACCESS_TTL") ?? "15m",
     };
   }
 
   private hashToken(token: string): string {
     return createHash("sha256").update(token).digest("hex");
+  }
+
+  private assertNotLocked(email: string): void {
+    const entry = this.failedLogins.get(email.toLowerCase());
+    if (entry?.lockedUntil && Date.now() < entry.lockedUntil) {
+      throw new UnauthorizedException({
+        code: "ACCOUNT_LOCKED",
+        message: "Account temporarily locked due to failed login attempts",
+      });
+    }
+  }
+
+  private recordFailedLogin(email: string): void {
+    const key = email.toLowerCase();
+    const entry = this.failedLogins.get(key) ?? { count: 0 };
+    entry.count += 1;
+    if (entry.count >= LOCKOUT_THRESHOLD) {
+      entry.lockedUntil = Date.now() + LOCKOUT_MS;
+    }
+    this.failedLogins.set(key, entry);
   }
 }
