@@ -2,6 +2,8 @@ import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { CurrentUser, type RequestUser } from "../auth/decorators/current-user.decorator";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CreateOrgDto } from "./dto/create-org.dto";
+import { OrgMemberGuard } from "../common/guards/org-member.guard";
+import { DashboardSummaryService } from "./dashboard-summary.service";
 import { OrgService } from "./org.service";
 import { SetupStatusService } from "./setup-status.service";
 
@@ -10,7 +12,8 @@ import { SetupStatusService } from "./setup-status.service";
 export class OrgController {
   constructor(
     private readonly orgs: OrgService,
-    private readonly setup: SetupStatusService
+    private readonly setup: SetupStatusService,
+    private readonly dashboard: DashboardSummaryService
   ) {}
 
   @Post()
@@ -32,5 +35,11 @@ export class OrgController {
   async setupStatus(@CurrentUser() user: RequestUser, @Param("orgId") orgId: string) {
     await this.orgs.getOrganization(orgId, user.userId);
     return this.setup.getStatus(orgId);
+  }
+
+  @Get(":orgId/dashboard")
+  @UseGuards(OrgMemberGuard)
+  dashboard(@Param("orgId") orgId: string) {
+    return this.dashboard.getSummary(orgId);
   }
 }

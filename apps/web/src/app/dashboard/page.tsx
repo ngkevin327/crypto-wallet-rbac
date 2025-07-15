@@ -1,17 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { listOrgs } from "@/lib/api/orgs";
+import { getDashboardSummary, type DashboardSummary } from "@/lib/api/dashboard";
 import { SetupChecklist } from "@/components/dashboard/setup-checklist";
+import { StatsCards } from "@/components/dashboard/stats-cards";
+import { RecentActivityFeed } from "@/components/dashboard/recent-activity-feed";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function DashboardPage() {
   const { user, token, loading } = useAuth();
   const [orgId, setOrgId] = useState<string | null>(null);
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
 
   useEffect(() => {
     if (!token) return;
-    listOrgs(token).then((orgs) => setOrgId(orgs[0]?.id ?? null));
+    listOrgs(token).then(async (orgs) => {
+      const id = orgs[0]?.id ?? null;
+      setOrgId(id);
+      if (id) {
+        setSummary(await getDashboardSummary(token, id));
+      }
+    });
   }, [token]);
 
   if (loading) {
@@ -19,25 +30,44 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-8">
       {token && orgId && <SetupChecklist token={token} orgId={orgId} />}
-      <h1 className="text-2xl font-semibold text-white mb-2">Dashboard</h1>
-      <p className="text-slate-400 mb-8">
-        Welcome{user ? `, ${user.email}` : ""}. Connect your first Safe to get started.
-      </p>
-      <div className="rounded-lg border border-dashed border-surface-border p-12 text-center">
-        <h2 className="text-lg font-medium text-slate-200 mb-2">Connect your first Safe</h2>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">
-          Link a Gnosis Safe treasury wallet to define roles, spending limits, and approval
-          workflows for your team.
-        </p>
-        <a
-          href="/dashboard/wallets"
-          className="inline-block mt-6 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-muted"
-        >
-          Go to Wallets
-        </a>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-white mb-1">Dashboard</h1>
+          <p className="text-slate-400 text-sm">
+            Welcome{user ? `, ${user.email}` : ""}.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link
+            href="/dashboard/intents/new"
+            className="rounded-md bg-accent px-4 py-2 text-sm text-white"
+          >
+            Create intent
+          </Link>
+          <Link
+            href="/dashboard/approvals"
+            className="rounded-md border border-surface-border px-4 py-2 text-sm text-slate-200"
+          >
+            Review approvals
+          </Link>
+        </div>
       </div>
+
+      {summary && (
+        <>
+          <StatsCards
+            pendingApprovals={summary.pendingApprovals}
+            intentsLast24h={summary.intentsLast24h}
+            policyDenials24h={summary.policyDenials24h}
+          />
+          <section>
+            <h2 className="text-lg font-medium text-white mb-3">Recent activity</h2>
+            <RecentActivityFeed events={summary.recentActivity} />
+          </section>
+        </>
+      )}
     </div>
   );
 }

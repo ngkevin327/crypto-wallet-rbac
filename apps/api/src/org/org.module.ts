@@ -6,6 +6,7 @@ import { InviteController } from "./invite.controller";
 import { InviteService } from "./invite.service";
 import { OrgController } from "./org.controller";
 import { OrgService } from "./org.service";
+import { DashboardSummaryService } from "./dashboard-summary.service";
 import { SetupStatusService } from "./setup-status.service";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
 
@@ -18,6 +19,7 @@ import { OrgMemberGuard } from "../common/guards/org-member.guard";
     OrgMemberGuard,
     PolicyTemplateSeedService,
     SetupStatusService,
+    DashboardSummaryService,
   ],
   exports: [OrgService, InviteService],
 })
