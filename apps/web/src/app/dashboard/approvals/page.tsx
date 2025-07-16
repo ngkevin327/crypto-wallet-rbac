@@ -6,6 +6,7 @@ import { apiRequest } from "@/lib/api-client";
 import { useApprovals } from "@/hooks/use-approvals";
 import { ApprovalInboxTable } from "@/components/approvals/approval-inbox-table";
 import { ApprovalActions } from "@/components/approvals/approval-actions";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { ApprovalRecord } from "@/lib/api/approvals";
 
 type Tab = "pending" | "fulfilled" | "rejected";
@@ -30,7 +31,9 @@ export default function ApprovalsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-white">Approvals inbox</h1>
+      <h1 className="text-xl font-semibold text-white" id="approvals-heading">
+        Approvals inbox
+      </h1>
       <div className="flex gap-2">
         {(["pending", "fulfilled", "rejected"] as Tab[]).map((t) => (
           <button
@@ -53,6 +56,15 @@ export default function ApprovalsPage() {
         <div className="lg:col-span-2">
           {loading ? (
             <p className="text-slate-500">Loading…</p>
+          ) : !items.length ? (
+            <EmptyState
+              title={tab === "pending" ? "No pending approvals" : `No ${tab} approvals`}
+              description={
+                tab === "pending"
+                  ? "When a transfer needs your review it will appear here."
+                  : "Completed requests are listed in this tab."
+              }
+            />
           ) : (
             <ApprovalInboxTable items={items} onSelect={setSelected} />
           )}
