@@ -1,4 +1,12 @@
 import type { ApiErrorBody } from "./api/types";
+import { friendlyApiMessage } from "./api/error-messages";
+
+type ApiErrorHandler = (message: string) => void;
+let globalErrorHandler: ApiErrorHandler | null = null;
+
+export function registerApiErrorHandler(handler: ApiErrorHandler | null): void {
+  globalErrorHandler = handler;
+}
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/v1";
 
@@ -49,12 +57,10 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       /* empty */
     }
     const err = payload?.error;
-    throw new ApiClientError(
-      err?.code ?? "HTTP_ERROR",
-      err?.message ?? response.statusText,
-      response.status,
-      err?.details
-    );
+    const code = err?.code ?? "HTTP_ERROR";
+    const message = friendlyApiMessage(code, err?.message ?? response.statusText);
+    globalErrorHandler?.(message);
+    throw new ApiClientError(code, message, response.status, err?.details);
   }
 
   if (response.status === 204) {
