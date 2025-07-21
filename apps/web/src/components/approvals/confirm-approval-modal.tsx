@@ -14,7 +14,7 @@ export function ConfirmApprovalModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true">
       <div className="w-full max-w-md rounded-lg border border-surface-border bg-surface-raised p-6 space-y-4">
         <h2 className="text-lg text-white capitalize">Confirm {decision}</h2>
         <p className="text-sm text-slate-400">

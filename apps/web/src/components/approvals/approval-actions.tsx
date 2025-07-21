@@ -34,6 +34,7 @@ export function ApprovalActions({
       <button
         type="button"
         disabled={disabled}
+        aria-label="Approve transfer intent"
         className="rounded-md bg-emerald-700 px-3 py-2 text-sm text-white disabled:opacity-40"
         onClick={() => setModal("approved")}
       >
@@ -42,6 +43,7 @@ export function ApprovalActions({
       <button
         type="button"
         disabled={disabled}
+        aria-label="Reject transfer intent"
         className="rounded-md bg-red-800 px-3 py-2 text-sm text-white disabled:opacity-40"
         onClick={() => setModal("rejected")}
       >
