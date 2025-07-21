@@ -5,6 +5,7 @@ import { POLICY_DENIED_PRICE_UNAVAILABLE } from "@wtp/shared/policy/reason-codes
 import { PRICE_ORACLE_PORT, type PriceOraclePort } from "@wtp/shared/integration/price-oracle.port";
 import { PriceUnavailableError } from "../integration/errors/price-unavailable.error";
 import type { EvaluatePolicyDto } from "./dto/evaluate-policy.dto";
+import { MetricsService } from "../observability/metrics.service";
 import { PolicyResolverService } from "./policy-resolver.service";
 import { RateCounterService } from "./rate-counter.service";
 
@@ -16,7 +17,8 @@ export class PolicyEvaluationService {
   constructor(
     @Inject(PRICE_ORACLE_PORT) private readonly oracle: PriceOraclePort,
     private readonly resolver: PolicyResolverService,
-    private readonly counters: RateCounterService
+    private readonly counters: RateCounterService,
+    private readonly metrics: MetricsService
   ) {}
 
   async evaluateIntent(dto: EvaluatePolicyDto): Promise<PolicyDecision> {
@@ -62,7 +64,12 @@ export class PolicyEvaluationService {
       intentAction: dto.intentAction ?? "transfer",
     };
 
-    return this.evaluator.evaluate(context, rules);
+    const started = Date.now();
+    const decision = this.evaluator.evaluate(context, rules);
+    this.metrics.timing("policy.eval.duration_ms", Date.now() - started, {
+      decision: decision.decision,
+    });
+    return decision;
   }
 
   async resolveAmountUsd(

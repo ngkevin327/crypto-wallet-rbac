@@ -1,0 +1,29 @@
+{
+  "title": "WTP API",
+  "widgets": [
+    {
+      "type": "metric",
+      "properties": {
+        "title": "Policy evaluation duration (p95)",
+        "metrics": [["WTP", "policy.eval.duration_ms"]],
+        "stat": "p95"
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "title": "Intents created",
+        "metrics": [["WTP", "intent.created"]],
+        "stat": "Sum"
+      }
+    },
+    {
+      "type": "metric",
+      "properties": {
+        "title": "Policy denials",
+        "metrics": [["WTP", "intent.denied"]],
+        "stat": "Sum"
+      }
+    }
+  ]
+}
