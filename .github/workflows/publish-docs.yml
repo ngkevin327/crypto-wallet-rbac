@@ -1,0 +1,23 @@
+name: Publish docs
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy user guide artifact
+        run: mkdir -p dist/docs && cp docs/user-guide.md dist/docs/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: user-guide
+          path: dist/docs
+
+      - name: Note OpenAPI publish
+        run: echo "Publish Redoc from apps/api OpenAPI spec on release tag"
