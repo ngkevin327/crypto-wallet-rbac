@@ -19,7 +19,7 @@
     "db:down": "docker compose down",
     "db:wait": "tsx scripts/wait-for-db.ts",
     "perf:policy": "pnpm --filter @wtp/api exec tsx src/policy/policy-evaluation.bench.ts",
-    "test:mvp-acceptance": "pnpm --filter @wtp/api test -- mvp-acceptance.e2e-spec"
+    "test:mvp-acceptance": "pnpm --filter @wtp/api test:e2e -- mvp-acceptance"
   },
   "devDependencies": {
     "pg": "^8.13.1",

@@ -47,12 +47,15 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const tokens = await this.auth.login(dto.email, dto.password, {
+    const result = await this.auth.login(dto.email, dto.password, {
       userAgent: req.headers["user-agent"],
       ip: req.ip,
     });
-    this.setRefreshCookie(res, tokens.refreshToken);
-    return { accessToken: tokens.accessToken, expiresIn: tokens.expiresIn };
+    if ("requiresMfa" in result) {
+      return result;
+    }
+    this.setRefreshCookie(res, result.refreshToken);
+    return { accessToken: result.accessToken, expiresIn: result.expiresIn };
   }
 
   @Post("refresh")
