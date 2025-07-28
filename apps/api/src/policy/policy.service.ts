@@ -6,7 +6,8 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { MemberStatus, PlatformRole, PolicyStatus } from "@prisma/client";
-import { INVALID_POLICY_RULE, parsePolicyRules } from "@wtp/shared/policy/policy.schema";
+import { parsePolicyRules } from "@wtp/shared/policy/policy.schema";
+import { INVALID_POLICY_RULE } from "@wtp/shared/policy/reason-codes";
 import type { PolicyRule } from "@wtp/shared/policy/rule-types";
 import { createHash } from "crypto";
 import { AuditService } from "../audit/audit.service";

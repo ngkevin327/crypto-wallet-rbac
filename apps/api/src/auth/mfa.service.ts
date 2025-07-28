@@ -6,7 +6,7 @@ import { PrismaService } from "../database/prisma.service";
 export class MfaService {
   constructor(private readonly prisma: PrismaService) {}
 
-  generateSetup(userId: string, email: string): { secret: string; otpauthUrl: string } {
+  generateSetup(_userId: string, email: string): { secret: string; otpauthUrl: string } {
     const secret = authenticator.generateSecret();
     const otpauthUrl = authenticator.keyuri(email, "Wallet Team Permissions", secret);
     return { secret, otpauthUrl };

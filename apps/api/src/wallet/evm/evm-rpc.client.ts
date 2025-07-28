@@ -21,7 +21,6 @@ export class EvmRpcClient {
       throw new Error(`Unsupported chainId: ${chainId}`);
     }
 
-    const rpcUrl = this.config.get<string>(chainMeta.rpcEnvKey.toLowerCase().replace(/_/g, "_"));
     const envKey = chainMeta.rpcEnvKey;
     const url =
       process.env[envKey] ??
