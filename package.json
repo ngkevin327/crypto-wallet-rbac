@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "dev:worker": "pnpm --filter @wtp/api worker:dev",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
@@ -18,6 +19,8 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:wait": "tsx scripts/wait-for-db.ts",
+    "setup:local": "pnpm db:up && pnpm db:wait && pnpm --filter @wtp/api db:generate && pnpm --filter @wtp/api exec prisma migrate deploy && pnpm build",
+    "verify:local": "tsx scripts/verify-local.ts",
     "perf:policy": "pnpm --filter @wtp/api exec tsx src/policy/policy-evaluation.bench.ts",
     "test:mvp-acceptance": "pnpm --filter @wtp/api test:e2e -- mvp-acceptance"
   },

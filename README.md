@@ -25,26 +25,45 @@ The API is a modular monolith: domain modules for auth, organizations, wallets, 
 
 ## Local development
 
-Start infrastructure:
-
-```bash
-docker compose up -d
-```
-
-Then install and run apps:
+1) Install dependencies:
 
 ```bash
 pnpm install
-pnpm db:wait        # wait for Postgres (after compose is up)
-pnpm dev            # API :3001, web :3000
 ```
 
-Or use `pnpm db:up` as an alias for `docker compose up -d`.
+2) Create local env files:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+3) Run deterministic bootstrap (DB + Prisma + builds):
+
+```bash
+pnpm setup:local
+```
+
+Equivalent expanded steps:
+
+```bash
+pnpm db:up
+pnpm db:wait
+pnpm --filter @wtp/api db:generate
+pnpm --filter @wtp/api exec prisma migrate deploy
+pnpm build
+```
+
+4) Start the app:
+
+```bash
+pnpm dev            # API :3001, web :3000
+```
 
 Background workers (wallet sync, approval expiry) run as a separate process:
 
 ```bash
-pnpm --filter @wtp/api worker:dev
+pnpm dev:worker
 ```
 
 Or start the worker container with Docker Compose:
@@ -58,13 +77,38 @@ docker compose --profile workers up -d
 | `pnpm db:up` | Start Postgres and Redis containers |
 | `pnpm db:down` | Stop containers |
 | `pnpm db:wait` | Block until Postgres accepts connections |
+| `pnpm setup:local` | Run DB startup, Prisma generate/migrate, and workspace build |
+| `pnpm verify:local` | Check API health/ready and web landing response |
+| `pnpm dev:worker` | Run API background worker locally |
 
-Copy environment templates:
+### Required vs optional local env
+
+API env (`apps/api/.env`):
+
+- Required to boot core product locally: `DATABASE_URL`, `JWT_ACCESS_SECRET`
+- Required for background workers: `REDIS_URL`
+- Required for Safe/RPC integration checks: `ETH_RPC_URL_SEPOLIA`, `ETH_RPC_URL_MAINNET`
+- Optional for local MVP core: `COINGECKO_API_KEY`, `SES_*`, `AWS_REGION`, `S3_AUDIT_EXPORT_BUCKET`
+
+Web env (`apps/web/.env`):
+
+- Required: `NEXT_PUBLIC_API_URL`
+- Optional (future wallet-connect UI): `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`
+
+### Verify the product is running locally
+
+With `pnpm dev` running, execute:
 
 ```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
+pnpm verify:local
 ```
+
+Expected result:
+
+- `PASS api-health`
+- `PASS api-ready`
+- `PASS web`
+- `Local verification passed.`
 
 ## Build and test
 

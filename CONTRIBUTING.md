@@ -31,10 +31,22 @@ Keep subjects imperative and under 72 characters. One logical change per commit.
 
 ```bash
 pnpm install
-pnpm db:up
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
+pnpm setup:local
 pnpm dev
+```
+
+In a separate terminal (optional but recommended for queue features):
+
+```bash
+pnpm dev:worker
+```
+
+Quick smoke verification while dev servers are running:
+
+```bash
+pnpm verify:local
 ```
 
 ## Code style
