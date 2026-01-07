@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { IntegrationModule } from "../integration/integration.module";
 import { OrgAdminGuard } from "../guards/org-admin.guard";
 import { OrgMemberGuard } from "../common/guards/org-member.guard";
@@ -12,7 +12,7 @@ import { PolicyService } from "./policy.service";
 import { RateCounterService } from "./rate-counter.service";
 
 @Module({
-  imports: [IntegrationModule, RolesModule],
+  imports: [IntegrationModule, forwardRef(() => RolesModule)],
   controllers: [PolicyController, PolicyEvaluationController],
   providers: [
     PolicyRepository,

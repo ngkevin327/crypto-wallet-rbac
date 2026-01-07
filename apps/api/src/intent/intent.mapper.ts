@@ -8,7 +8,7 @@ type IntentWithApprovals = TransactionIntent & {
 
 export function toIntentResponse(intent: IntentWithApprovals): IntentResponseDto {
   const pending = intent.approvalRequests?.find((r) => r.status === "pending");
-  const decision = intent.policyDecisionJson as PolicyDecision;
+  const decision = intent.policyDecisionJson as unknown as PolicyDecision;
 
   return {
     id: intent.id,

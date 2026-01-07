@@ -2,7 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@wtp/shared": ["../shared/dist/index.d.ts"],
+      "@wtp/shared/*": ["../shared/dist/*"]
+    }
   },
   "include": ["src/**/*"]
 }

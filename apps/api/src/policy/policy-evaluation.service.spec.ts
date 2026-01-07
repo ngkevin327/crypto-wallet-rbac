@@ -14,12 +14,15 @@ describe("PolicyEvaluationService", () => {
   const counters = {
     getCounters: jest.fn().mockResolvedValue({ dailyUsdSpent: 0, txCountLastHour: 0 }),
   } as unknown as RateCounterService;
+  const metrics = {
+    timing: jest.fn(),
+  };
 
   let service: PolicyEvaluationService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new PolicyEvaluationService(oracle as never, resolver, counters);
+    service = new PolicyEvaluationService(oracle as never, resolver, counters, metrics as never);
   });
 
   it("returns DENY when oracle is unavailable (fail-closed)", async () => {

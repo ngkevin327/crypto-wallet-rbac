@@ -38,7 +38,7 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-3) Run deterministic bootstrap (DB + Prisma + builds):
+3) Run deterministic bootstrap (DB + Prisma schema sync):
 
 ```bash
 pnpm setup:local
@@ -50,7 +50,12 @@ Equivalent expanded steps:
 pnpm db:up
 pnpm db:wait
 pnpm --filter @wtp/api db:generate
-pnpm --filter @wtp/api exec prisma migrate deploy
+pnpm --filter @wtp/api db:push
+```
+
+Optional full workspace compile check:
+
+```bash
 pnpm build
 ```
 
@@ -77,7 +82,7 @@ docker compose --profile workers up -d
 | `pnpm db:up` | Start Postgres and Redis containers |
 | `pnpm db:down` | Stop containers |
 | `pnpm db:wait` | Block until Postgres accepts connections |
-| `pnpm setup:local` | Run DB startup, Prisma generate/migrate, and workspace build |
+| `pnpm setup:local` | Run DB startup, Prisma client generation, and schema sync |
 | `pnpm verify:local` | Check API health/ready and web landing response |
 | `pnpm dev:worker` | Run API background worker locally |
 
@@ -109,6 +114,8 @@ Expected result:
 - `PASS api-ready`
 - `PASS web`
 - `Local verification passed.`
+
+Validation output template and MVP gap matrix: `docs/local-mvp-validation-report.md`.
 
 ## Build and test
 

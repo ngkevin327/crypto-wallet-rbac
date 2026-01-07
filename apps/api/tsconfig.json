@@ -1,12 +1,22 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
     "module": "CommonJS",
     "moduleResolution": "Node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@wtp/shared": ["../../packages/shared/dist/index.d.ts"],
+      "@wtp/shared/*": ["../../packages/shared/dist/*"],
+      "@wtp/policy-engine": ["../../packages/policy-engine/dist/index.d.ts"],
+      "@wtp/policy-engine/*": ["../../packages/policy-engine/dist/*"]
+    },
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

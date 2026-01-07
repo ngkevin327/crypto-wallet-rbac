@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, forwardRef } from "@nestjs/common";
 import { ApiKeysModule } from "../api-keys/api-keys.module";
 import { AuthModule } from "../auth/auth.module";
 import { ApiKeyAuthGuard } from "../auth/guards/api-key-auth.guard";
@@ -16,7 +16,14 @@ import { IntentService } from "./intent.service";
 import { SafePayloadBuilder } from "./safe-payload.builder";
 
 @Module({
-  imports: [PolicyModule, ApprovalModule, WalletModule, BullMqModule, ApiKeysModule, AuthModule],
+  imports: [
+    forwardRef(() => PolicyModule),
+    ApprovalModule,
+    WalletModule,
+    BullMqModule,
+    ApiKeysModule,
+    AuthModule,
+  ],
   controllers: [IntentController],
   providers: [
     IntentRepository,

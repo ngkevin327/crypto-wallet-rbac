@@ -53,6 +53,9 @@ describe("AuthService login", () => {
       passwordHash: hash,
     });
     const tokens = await service.login("a@b.com", "secret");
+    if ("requiresMfa" in tokens) {
+      throw new Error("Expected token response, received MFA challenge");
+    }
     expect(tokens.accessToken).toBeDefined();
     expect(tokens.refreshToken).toBeDefined();
   });

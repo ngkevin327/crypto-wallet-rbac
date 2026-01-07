@@ -13,7 +13,7 @@ export class OrgController {
   constructor(
     private readonly orgs: OrgService,
     private readonly setup: SetupStatusService,
-    private readonly dashboard: DashboardSummaryService
+    private readonly dashboardSummary: DashboardSummaryService
   ) {}
 
   @Post()
@@ -40,6 +40,6 @@ export class OrgController {
   @Get(":orgId/dashboard")
   @UseGuards(OrgMemberGuard)
   dashboard(@Param("orgId") orgId: string) {
-    return this.dashboard.getSummary(orgId);
+    return this.dashboardSummary.getSummary(orgId);
   }
 }
