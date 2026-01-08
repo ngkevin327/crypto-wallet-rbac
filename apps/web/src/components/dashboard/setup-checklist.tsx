@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiRequest } from "@/lib/api-client";
+import { IconCheckCircle, IconSparkles } from "@/components/icons";
+import { cn } from "@/lib/cn";
 
 interface SetupStatus {
   hasWallet: boolean;
@@ -30,35 +33,60 @@ export function SetupChecklist({ token, orgId }: Props) {
   }
 
   const steps = [
-    { label: "Connect a wallet", done: status.hasWallet, href: "/dashboard/wallets" },
-    { label: "Invite a team member", done: status.hasTeamMember, href: "/dashboard/team" },
+    { label: "Connect a Gnosis Safe wallet", done: status.hasWallet, href: "/dashboard/wallets" },
+    { label: "Invite your first team member", done: status.hasTeamMember, href: "/dashboard/team" },
     { label: "Create a spending policy", done: status.hasPolicy, href: "/dashboard/policies" },
   ];
+  const doneCount = steps.filter((s) => s.done).length;
 
   return (
-    <div className="rounded-lg border border-accent/30 bg-accent/5 p-5 mb-8">
-      <h2 className="text-sm font-semibold text-white mb-3">Getting started</h2>
-      <ul className="space-y-2">
+    <div className="rounded-2xl border border-brand-500/25 bg-gradient-to-br from-brand-500/10 via-surface-raised/80 to-surface-raised/40 p-6 shadow-glow">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/20 text-brand-300">
+            <IconSparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="font-display text-base font-semibold text-white">Complete your setup</h2>
+            <p className="mt-1 text-sm text-slate-400">
+              {doneCount} of {steps.length} steps done — unlock full treasury governance
+            </p>
+          </div>
+        </div>
+        <div className="hidden sm:flex h-2 w-24 overflow-hidden rounded-full bg-surface-border">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all"
+            style={{ width: `${(doneCount / steps.length) * 100}%` }}
+          />
+        </div>
+      </div>
+      <ul className="mt-5 space-y-2">
         {steps.map((s) => (
-          <li key={s.label} className="flex items-center gap-2 text-sm">
-            <span className={s.done ? "text-emerald-400" : "text-slate-500"}>
-              {s.done ? "✓" : "○"}
-            </span>
-            <a href={s.href} className="text-slate-300 hover:text-white">
-              {s.label}
-            </a>
+          <li key={s.label}>
+            <Link
+              href={s.href}
+              className={cn(
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors",
+                s.done ? "text-slate-500" : "text-slate-200 hover:bg-white/5"
+              )}
+            >
+              <IconCheckCircle
+                className={cn("h-5 w-5", s.done ? "text-emerald-400" : "text-slate-600")}
+              />
+              <span className={s.done ? "line-through" : "font-medium"}>{s.label}</span>
+            </Link>
           </li>
         ))}
       </ul>
       <button
         type="button"
-        className="mt-4 text-xs text-slate-500 hover:text-slate-300"
+        className="mt-4 text-xs text-slate-500 transition-colors hover:text-slate-300"
         onClick={() => {
           localStorage.setItem(`wtp-setup-dismissed-${orgId}`, "1");
           setDismissed(true);
         }}
       >
-        Dismiss checklist
+        Dismiss for now
       </button>
     </div>
   );

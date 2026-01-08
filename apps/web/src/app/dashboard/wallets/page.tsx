@@ -5,6 +5,9 @@ import { listOrgs } from "@/lib/api/orgs";
 import { ConnectSafeForm } from "@/components/wallets/connect-safe-form";
 import { WalletCard } from "@/components/wallets/wallet-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { IconWallet } from "@/components/icons";
 import { useWalletRefresh } from "@/hooks/use-wallet-refresh";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -20,26 +23,39 @@ export default function WalletsPage() {
   const { wallets, loading, error, refresh } = useWalletRefresh(token, orgId);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Wallets</h1>
-        <p className="text-slate-400 text-sm mt-1">Connect and monitor Gnosis Safe treasuries</p>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        title="Wallets"
+        description="Connect Gnosis Safe treasuries and keep owner lists in sync for policy enforcement."
+      />
 
-      {token && <ConnectSafeForm token={token} onConnected={refresh} />}
+      {token && (
+        <Card glow>
+          <CardHeader title="Connect a Safe" description="Verify ownership with a one-time signature" />
+          <CardBody className="pt-0">
+            <ConnectSafeForm token={token} onConnected={refresh} />
+          </CardBody>
+        </Card>
+      )}
 
-      <section>
-        <h2 className="text-lg font-medium text-white mb-4">Connected Safes</h2>
-        {error && <p className="text-sm text-red-400 mb-2">{error}</p>}
-        {loading && <p className="text-slate-400">Loading…</p>}
+      <section className="space-y-4">
+        <h2 className="font-display text-lg font-semibold text-white">Connected Safes</h2>
+        {error && (
+          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            {error}
+          </p>
+        )}
+        {loading && <p className="text-slate-400">Loading wallets…</p>}
         {!loading && wallets.length === 0 && (
           <EmptyState
             title="No wallets connected"
-            description="Connect your Gnosis Safe treasury to create transfer intents."
+            description="Connect your Gnosis Safe treasury to create transfer intents and enforce spending policies."
             actionLabel="Connect Safe above"
+            actionHref="#"
+            icon={<IconWallet className="h-7 w-7" />}
           />
         )}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           {wallets.map((w) => (
             <WalletCard key={w.id} wallet={w} />
           ))}

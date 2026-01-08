@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { proposeIntent } from "@/lib/api/intents";
+import { Button } from "@/components/ui/button";
 
 export function SignTransactionButton({
   token,
@@ -32,14 +33,9 @@ export function SignTransactionButton({
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => void handleSign()}
-        disabled={loading}
-        className="rounded-md bg-accent px-4 py-2 text-sm text-white disabled:opacity-50"
-      >
+      <Button type="button" onClick={() => void handleSign()} disabled={loading} size="md">
         {loading ? "Proposing…" : "Sign with wallet"}
-      </button>
+      </Button>
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
     </div>
   );

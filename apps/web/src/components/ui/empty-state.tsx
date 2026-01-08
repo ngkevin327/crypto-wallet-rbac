@@ -1,27 +1,34 @@
 "use client";
 
+import Link from "next/link";
+import { Button } from "./button";
+
 export function EmptyState({
   title,
   description,
   actionLabel,
   actionHref,
+  icon,
 }: {
   title: string;
   description: string;
   actionLabel?: string;
   actionHref?: string;
+  icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-surface-border p-12 text-center">
-      <h2 className="text-lg font-medium text-slate-200 mb-2">{title}</h2>
-      <p className="text-sm text-slate-500 max-w-md mx-auto">{description}</p>
+    <div className="rounded-2xl border border-dashed border-surface-border bg-surface-raised/40 px-8 py-14 text-center">
+      {icon && (
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-300">
+          {icon}
+        </div>
+      )}
+      <h2 className="font-display text-lg font-semibold text-slate-100">{title}</h2>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">{description}</p>
       {actionLabel && actionHref && (
-        <a
-          href={actionHref}
-          className="inline-block mt-6 rounded-md bg-accent px-4 py-2 text-sm font-medium text-white"
-        >
-          {actionLabel}
-        </a>
+        <Link href={actionHref} className="mt-8 inline-block">
+          <Button size="md">{actionLabel}</Button>
+        </Link>
       )}
     </div>
   );

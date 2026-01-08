@@ -2,17 +2,19 @@
 
 import type { WalletRecord } from "@/lib/api/wallets";
 import { WalletOwnersList } from "./wallet-owners-list";
+import { Card, CardBody } from "@/components/ui/card";
+import { cn } from "@/lib/cn";
 
 function chainLabel(chainId: number): string {
-  if (chainId === 1) return "Ethereum Mainnet";
+  if (chainId === 1) return "Mainnet";
   if (chainId === 11155111) return "Sepolia";
   return `Chain ${chainId}`;
 }
 
 function chainBadgeClass(chainId: number): string {
-  if (chainId === 1) return "bg-amber-500/15 text-amber-300";
-  if (chainId === 11155111) return "bg-violet-500/15 text-violet-300";
-  return "bg-slate-500/15 text-slate-300";
+  if (chainId === 1) return "bg-amber-500/15 text-amber-200 ring-amber-500/25";
+  if (chainId === 11155111) return "bg-violet-500/15 text-violet-200 ring-violet-500/25";
+  return "bg-slate-500/15 text-slate-300 ring-slate-500/25";
 }
 
 function formatSynced(lastSyncedAt: string | null): string {
@@ -34,35 +36,40 @@ export function WalletCard({ wallet }: Props) {
     Date.now() - new Date(wallet.lastSyncedAt).getTime() > 15 * 60 * 1000;
 
   return (
-    <div className="rounded-lg border border-surface-border bg-surface-raised p-5">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <h3 className="font-medium text-white">{wallet.nickname ?? "Unnamed Safe"}</h3>
-          <p className="text-xs font-mono text-slate-500 mt-1 break-all">{wallet.address}</p>
+    <Card className="h-full">
+      <CardBody>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-display text-lg font-semibold text-white">
+              {wallet.nickname ?? "Treasury Safe"}
+            </h3>
+            <p className="mt-1.5 break-all font-mono text-xs text-slate-500">{wallet.address}</p>
+          </div>
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1",
+              chainBadgeClass(wallet.chainId)
+            )}
+          >
+            {chainLabel(wallet.chainId)}
+          </span>
         </div>
-        <span
-          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${chainBadgeClass(wallet.chainId)}`}
-        >
-          {chainLabel(wallet.chainId)}
-        </span>
-      </div>
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <dt className="text-slate-500">Signing threshold</dt>
-          <dd className="text-slate-200 font-medium">
-            {wallet.safeThreshold != null
-              ? `${wallet.safeThreshold} signature${wallet.safeThreshold === 1 ? "" : "s"}`
-              : "—"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-slate-500">Last sync</dt>
-          <dd className={syncStale ? "text-amber-400" : "text-emerald-400"}>
-            {formatSynced(wallet.lastSyncedAt)}
-          </dd>
-        </div>
-      </dl>
-      <WalletOwnersList owners={wallet.safeOwners ?? []} threshold={wallet.safeThreshold} />
-    </div>
+        <dl className="mt-6 grid grid-cols-2 gap-4">
+          <div className="rounded-xl bg-surface-overlay/60 p-3">
+            <dt className="text-xs text-slate-500">Signing threshold</dt>
+            <dd className="mt-1 font-display text-lg font-semibold text-white">
+              {wallet.safeThreshold != null ? wallet.safeThreshold : "—"}
+            </dd>
+          </div>
+          <div className="rounded-xl bg-surface-overlay/60 p-3">
+            <dt className="text-xs text-slate-500">Last sync</dt>
+            <dd className={cn("mt-1 text-sm font-medium", syncStale ? "text-amber-300" : "text-emerald-300")}>
+              {formatSynced(wallet.lastSyncedAt)}
+            </dd>
+          </div>
+        </dl>
+        <WalletOwnersList owners={wallet.safeOwners ?? []} threshold={wallet.safeThreshold} />
+      </CardBody>
+    </Card>
   );
 }

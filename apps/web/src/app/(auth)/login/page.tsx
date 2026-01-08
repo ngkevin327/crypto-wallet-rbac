@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { login } from "@/lib/api/auth";
 import { ApiClientError } from "@/lib/api-client";
+import { Card, CardBody } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,45 +36,44 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="rounded-lg border border-surface-border bg-surface-raised p-8 shadow-xl">
-      <h1 className="text-xl font-semibold text-white mb-1">Sign in</h1>
-      <p className="text-sm text-slate-400 mb-6">Wallet Team Permissions</p>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm text-slate-300 mb-1">Email</label>
-          <input
+    <Card glow className="overflow-hidden">
+      <CardBody className="p-8">
+        <h1 className="font-display text-2xl font-semibold text-white">Welcome back</h1>
+        <p className="mt-2 text-sm text-slate-400">Sign in to manage treasury permissions</p>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <Input
+            label="Work email"
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm"
+            placeholder="you@company.com"
             required
           />
-        </div>
-        <div>
-          <label className="block text-sm text-slate-300 mb-1">Password</label>
-          <input
+          <Input
+            label="Password"
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm"
             required
           />
-        </div>
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-md bg-accent py-2 text-sm font-medium text-white hover:bg-accent-muted disabled:opacity-50"
-        >
-          {loading ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm text-slate-400">
-        No account?{" "}
-        <Link href="/register" className="text-accent hover:underline">
-          Register
-        </Link>
-      </p>
-    </div>
+          {error && (
+            <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={loading} className="w-full" size="lg">
+            {loading ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+        <p className="mt-6 text-center text-sm text-slate-400">
+          New to WTP?{" "}
+          <Link href="/register" className="font-medium text-brand-300 hover:text-brand-200">
+            Create an account
+          </Link>
+        </p>
+      </CardBody>
+    </Card>
   );
 }

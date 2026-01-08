@@ -10,18 +10,17 @@ export function RecentActivityFeed({
   }[];
 }) {
   if (!events.length) {
-    return <p className="text-sm text-slate-500">No recent activity.</p>;
+    return <p className="py-4 text-sm text-slate-500">No recent activity yet.</p>;
   }
 
   return (
-    <ul className="space-y-2">
+    <ul className="divide-y divide-surface-border/60">
       {events.map((e) => (
-        <li
-          key={e.id}
-          className="flex justify-between text-sm border-b border-surface-border/50 py-2"
-        >
-          <span className="font-mono text-xs text-slate-300">{e.eventType}</span>
-          <span className="text-slate-500">{new Date(e.createdAt).toLocaleString()}</span>
+        <li key={e.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
+          <span className="rounded-lg bg-surface-overlay px-2.5 py-1 font-mono text-xs text-brand-200">
+            {e.eventType}
+          </span>
+          <time className="shrink-0 text-xs text-slate-500">{new Date(e.createdAt).toLocaleString()}</time>
         </li>
       ))}
     </ul>

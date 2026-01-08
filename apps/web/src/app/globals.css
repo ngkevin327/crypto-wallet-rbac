@@ -2,13 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #0f1419;
-  --foreground: #e7ecf3;
+@layer base {
+  :root {
+    --background: #070b12;
+    --foreground: #e8edf5;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface text-slate-200 antialiased;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    @apply bg-brand-500/40 text-white;
+  }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  min-height: 100vh;
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), var(--font-body), system-ui, sans-serif;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-white via-slate-100 to-brand-200 bg-clip-text text-transparent;
+  }
 }

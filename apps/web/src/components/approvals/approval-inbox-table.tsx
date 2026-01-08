@@ -10,35 +10,35 @@ export function ApprovalInboxTable({
   onSelect: (item: ApprovalRecord) => void;
 }) {
   if (!items.length) {
-    return <p className="text-sm text-slate-500">No approval requests in this tab.</p>;
+    return null;
   }
 
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="text-left text-slate-500 border-b border-surface-border">
-          <th className="py-2">Intent</th>
-          <th className="py-2">Quorum</th>
-          <th className="py-2">Expires</th>
-          <th className="py-2" />
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((row) => (
-          <tr
-            key={row.id}
-            className="border-b border-surface-border/50 hover:bg-surface cursor-pointer"
-            onClick={() => onSelect(row)}
-          >
-            <td className="py-3 font-mono text-xs">{row.intentId.slice(0, 8)}…</td>
-            <td className="py-3">{row.requiredCount} required</td>
-            <td className="py-3 text-slate-400">
-              {new Date(row.expiresAt).toLocaleString()}
-            </td>
-            <td className="py-3 text-accent text-xs">Review</td>
+    <div className="overflow-hidden rounded-2xl border border-surface-border bg-surface-raised/50">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-surface-border bg-surface-overlay/40 text-left text-xs font-medium uppercase tracking-wide text-slate-500">
+            <th className="px-4 py-3">Intent</th>
+            <th className="px-4 py-3">Quorum</th>
+            <th className="px-4 py-3">Expires</th>
+            <th className="px-4 py-3" />
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {items.map((row) => (
+            <tr
+              key={row.id}
+              className="cursor-pointer border-b border-surface-border/40 transition-colors last:border-0 hover:bg-brand-500/5"
+              onClick={() => onSelect(row)}
+            >
+              <td className="px-4 py-3.5 font-mono text-xs text-slate-200">{row.intentId.slice(0, 10)}…</td>
+              <td className="px-4 py-3.5 text-slate-300">{row.requiredCount} required</td>
+              <td className="px-4 py-3.5 text-slate-500">{new Date(row.expiresAt).toLocaleString()}</td>
+              <td className="px-4 py-3.5 text-right text-xs font-medium text-brand-300">Review →</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

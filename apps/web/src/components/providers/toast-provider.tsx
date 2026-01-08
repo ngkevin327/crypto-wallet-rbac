@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { registerApiErrorHandler } from "@/lib/api-client";
+import { cn } from "@/lib/cn";
 
 type Toast = { id: number; message: string; variant: "success" | "error" };
 
@@ -15,7 +16,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const toast = useCallback((message: string, variant: "success" | "error" = "success") => {
     const id = Date.now();
     setItems((prev) => [...prev, { id, message, variant }]);
-    setTimeout(() => setItems((prev) => prev.filter((t) => t.id !== id)), 4000);
+    setTimeout(() => setItems((prev) => prev.filter((t) => t.id !== id)), 4500);
   }, []);
 
   useEffect(() => {
@@ -26,13 +27,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
         {items.map((t) => (
           <div
             key={t.id}
-            className={`rounded-md px-4 py-2 text-sm text-white shadow-lg ${
-              t.variant === "error" ? "bg-red-800" : "bg-emerald-800"
-            }`}
+            role="status"
+            className={cn(
+              "animate-slide-up rounded-xl border px-4 py-3 text-sm font-medium text-white shadow-lg backdrop-blur-md",
+              t.variant === "error"
+                ? "border-red-500/40 bg-red-950/90"
+                : "border-emerald-500/40 bg-emerald-950/90"
+            )}
           >
             {t.message}
           </div>

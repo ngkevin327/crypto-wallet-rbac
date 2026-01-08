@@ -11,13 +11,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <AuthProvider>
       <ToastProvider>
         <ErrorBoundary>
-          <div className="flex min-h-screen">
+          <div className="flex min-h-screen bg-surface">
+            <div className="pointer-events-none fixed inset-0 bg-mesh-app" aria-hidden />
             <Sidebar />
-            <main className="flex-1 p-8">
-              <div className="flex justify-end mb-4">
+            <main className="relative flex-1 overflow-x-hidden">
+              <div className="sticky top-0 z-10 flex justify-end border-b border-surface-border/60 bg-surface/80 px-8 py-4 backdrop-blur-md">
                 <HelpLink />
               </div>
-              {children}
+              <div className="animate-fade-in px-8 py-8">{children}</div>
             </main>
           </div>
         </ErrorBoundary>
