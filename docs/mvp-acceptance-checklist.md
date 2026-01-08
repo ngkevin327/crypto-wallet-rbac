@@ -15,3 +15,20 @@ Run automated suite:
 ```bash
 pnpm test:mvp-acceptance
 ```
+
+## Local working-product verification checklist
+
+Run these while API and web dev servers are running:
+
+```bash
+pnpm verify:local
+```
+
+Expected:
+
+- `PASS api-health`
+- `PASS api-ready`
+- `PASS web`
+- `Local verification passed.`
+
+Latest execution evidence is tracked in `docs/local-mvp-validation-report.md`.
