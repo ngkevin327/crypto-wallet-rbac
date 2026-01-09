@@ -32,3 +32,11 @@ Expected:
 - `Local verification passed.`
 
 Latest execution evidence is tracked in `docs/local-mvp-validation-report.md`.
+
+## UI regression (post–design-system unification)
+
+After commits `010e8da` and `3a9ac35` (web-only):
+
+- MVP API acceptance: **no change** — still 2/3 passing; criterion #2 fails on API validation (dummy wallet), not UI.
+- Policy Playwright hooks (`data-testid="policy-*"`) and approval `aria-label`s: **preserved**.
+- Details: `docs/mvp-run-execution-report.md` (Phase F) and `docs/local-mvp-validation-report.md` (UI unification regression check).

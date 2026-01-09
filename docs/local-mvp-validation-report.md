@@ -1,7 +1,7 @@
 # Local MVP validation report
 
-Date: 2026-05-20  
-Scope: local developer bootstrap, runtime smoke checks, and MVP acceptance coverage status.
+Date: 2026-05-21  
+Scope: local developer bootstrap, runtime smoke checks, MVP acceptance coverage, and post–UI-unification regression check.
 
 ## Local run status
 
@@ -22,6 +22,27 @@ Scope: local developer bootstrap, runtime smoke checks, and MVP acceptance cover
 | `pnpm typecheck` | FAIL (workspace-level pre-existing web typecheck issues) |
 | `pnpm lint` | FAIL (large pre-existing lint backlog in api + web) |
 | `pnpm test:mvp-acceptance` | FAIL (criterion #2 test currently returns 400 in policy evaluate step) |
+| `pnpm --filter @wtp/web exec tsc --noEmit` | PASS (after UI unification commit `3a9ac35`) |
+
+## UI unification regression check (2026-05-21)
+
+Commits `010e8da` (dashboard redesign) and `3a9ac35` (shared design system) touch **only** `apps/web`. No changes to `apps/api`, `packages/*`, Prisma schema, or API routes.
+
+### Verification performed
+
+| Check | Result | Notes |
+|---|---|---|
+| Git scope (`010e8da..3a9ac35`) | PASS | Zero diffs under `apps/api` / `packages` |
+| MVP API client calls in web components | PASS | `inviteMember`, `evaluatePolicy`, `createIntent`, `decideApproval`, `startWalletConnect`, `createApiKey`, etc. unchanged |
+| Policy form `data-testid` hooks | PASS | `policy-form`, `policy-token-address`, `policy-daily-limit`, `policy-per-tx-limit`, `policy-approver-count`, `policy-save` retained |
+| Approval action accessibility | PASS | `aria-label` approve/reject preserved |
+| Playwright-facing copy | PASS | `PageHeader` titles match e2e expectations (`Approvals`, `New USDC transfer`) |
+| `pnpm test:mvp-acceptance` (DB up) | **UNCHANGED** | 2 pass, 1 fail — same criterion #2 (400 on `/v1/policy/evaluate` with dummy `walletId`) |
+| Web TypeScript | PASS | `pnpm --filter @wtp/web exec tsc --noEmit` |
+
+### Conclusion
+
+**No MVP functional side effects identified from the UI work.** Failures and gaps in the matrix below are the same as before the redesign (API acceptance fixture / seeded data, not presentation-layer regressions).
 
 ## MVP acceptance matrix (PRD §19)
 
@@ -64,3 +85,5 @@ pnpm lint
   - circular module import between policy/roles/intent modules,
   - missing `JwtAuthGuard` provider export for `JwtOrApiKeyGuard`,
   - package subpath resolution for `@wtp/shared/*` via package exports.
+- UI commits on branch: `010e8da`, `3a9ac35` — cosmetic/layout only; see **UI unification regression check** above.
+- Full execution narrative: `docs/mvp-run-execution-report.md`.
