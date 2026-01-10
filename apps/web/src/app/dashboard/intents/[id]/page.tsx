@@ -5,6 +5,11 @@ import { useAuth } from "@/providers/auth-provider";
 import { useIntentStatus } from "@/hooks/use-intent-status";
 import { IntentStatusTimeline } from "@/components/intents/intent-status-timeline";
 import { SignTransactionButton } from "@/components/intents/sign-transaction-button";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { LoadingState } from "@/components/ui/loading";
 
 export default function IntentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -12,36 +17,47 @@ export default function IntentDetailPage({ params }: { params: Promise<{ id: str
   const { intent, error, refresh } = useIntentStatus(token, id);
 
   if (error) {
-    return <p className="text-red-400">{error}</p>;
+    return <Alert variant="error">{error}</Alert>;
   }
   if (!intent) {
-    return <p className="text-slate-400">Loading intent…</p>;
+    return <LoadingState message="Loading intent…" />;
   }
 
-  const canSign =
-    intent.status === "ready_to_sign" || intent.status === "submitted";
+  const canSign = intent.status === "ready_to_sign" || intent.status === "submitted";
 
   return (
     <div className="max-w-2xl space-y-8">
-      <div>
-        <h1 className="text-xl font-semibold text-white">Transfer intent</h1>
-        <p className="text-sm text-slate-500 mt-1 font-mono">{intent.id}</p>
-        <p className="text-sm text-slate-400 mt-2 capitalize">Status: {intent.status}</p>
+      <PageHeader
+        title="Transfer intent"
+        description={intent.id}
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge tone={intent.status === "executed" ? "active" : "pending"}>{intent.status}</Badge>
       </div>
 
-      <IntentStatusTimeline intent={intent} />
+      <Card>
+        <CardHeader title="Status timeline" description="Policy, approval, and on-chain progress" />
+        <CardBody className="pt-2">
+          <IntentStatusTimeline intent={intent} />
+        </CardBody>
+      </Card>
 
       {canSign && token && (
-        <SignTransactionButton
-          token={token}
-          intentId={intent.id}
-          senderAddress="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
-          onProposed={() => void refresh()}
-        />
+        <Card glow>
+          <CardHeader title="Sign with Safe" description="Propose transaction to the Safe Transaction Service" />
+          <CardBody className="pt-0">
+            <SignTransactionButton
+              token={token}
+              intentId={intent.id}
+              senderAddress="0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+              onProposed={() => void refresh()}
+            />
+          </CardBody>
+        </Card>
       )}
 
       {intent.txHash && (
-        <p className="text-xs font-mono text-slate-500 break-all">{intent.txHash}</p>
+        <p className="break-all font-mono text-xs text-slate-500">{intent.txHash}</p>
       )}
     </div>
   );

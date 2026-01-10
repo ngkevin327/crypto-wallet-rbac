@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import type { PolicyRecord, RoleRecord } from "@/lib/api/policies";
 import { PolicySummary } from "./policy-summary";
+import { Card, CardBody } from "@/components/ui/card";
+import { TextLink } from "@/components/ui/link";
 
 interface Props {
   role: RoleRecord;
@@ -14,29 +15,28 @@ export function PolicyRoleGroup({ role, policies }: Props) {
   const latest = active[0];
 
   return (
-    <div className="rounded-lg border border-surface-border bg-surface-raised p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="font-medium text-white">{role.name}</h3>
-          <p className="text-xs text-slate-500 mt-1 capitalize">{role.templateType}</p>
+    <Card>
+      <CardBody>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="font-display text-lg font-semibold text-white">{role.name}</h3>
+            <p className="mt-1 text-xs capitalize text-slate-500">{role.templateType}</p>
+          </div>
+          <TextLink href={`/dashboard/policies/${role.id}/edit`}>
+            {latest ? "Edit policy" : "Create policy"}
+          </TextLink>
         </div>
-        <Link
-          href={`/dashboard/policies/${role.id}/edit`}
-          className="text-sm text-accent hover:underline"
-        >
-          {latest ? "Edit policy" : "Create policy"}
-        </Link>
-      </div>
-      {latest ? (
-        <div className="mt-4">
-          <PolicySummary rules={latest.rules} />
-          <p className="text-xs text-slate-600 mt-2">
-            v{latest.version} · updated {new Date(latest.updatedAt).toLocaleDateString()}
-          </p>
-        </div>
-      ) : (
-        <p className="text-sm text-slate-500 mt-4">No active policy for this role.</p>
-      )}
-    </div>
+        {latest ? (
+          <div className="mt-4">
+            <PolicySummary rules={latest.rules} />
+            <p className="mt-2 text-xs text-slate-600">
+              v{latest.version} · updated {new Date(latest.updatedAt).toLocaleDateString()}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-slate-500">No active policy for this role.</p>
+        )}
+      </CardBody>
+    </Card>
   );
 }

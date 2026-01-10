@@ -8,6 +8,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { IconWallet } from "@/components/icons";
+import { Alert } from "@/components/ui/alert";
+import { LoadingState } from "@/components/ui/loading";
 import { useWalletRefresh } from "@/hooks/use-wallet-refresh";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -40,12 +42,8 @@ export default function WalletsPage() {
 
       <section className="space-y-4">
         <h2 className="font-display text-lg font-semibold text-white">Connected Safes</h2>
-        {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-            {error}
-          </p>
-        )}
-        {loading && <p className="text-slate-400">Loading wallets…</p>}
+        {error && <Alert variant="error">{error}</Alert>}
+        {loading && <LoadingState message="Loading wallets…" />}
         {!loading && wallets.length === 0 && (
           <EmptyState
             title="No wallets connected"

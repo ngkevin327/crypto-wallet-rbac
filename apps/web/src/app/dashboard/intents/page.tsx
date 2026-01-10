@@ -5,6 +5,10 @@ import Link from "next/link";
 import { listOrgs } from "@/lib/api/orgs";
 import { listIntents, type IntentRecord } from "@/lib/api/intents";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { IconSend } from "@/components/icons";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function IntentsListPage() {
@@ -23,32 +27,34 @@ export default function IntentsListPage() {
   }, [token]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-white">Transfer intents</h1>
-        <Link href="/dashboard/intents/new" className="text-sm text-accent">
-          New transfer
-        </Link>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Transfer intents"
+        description="Track USDC payout requests through policy checks and approvals."
+        actions={[{ label: "New transfer", href: "/dashboard/intents/new" }]}
+      />
       {!intents.length ? (
         <EmptyState
           title="No transfer intents yet"
           description="Create a USDC payout intent to start the approval workflow."
           actionLabel="Create intent"
           actionHref="/dashboard/intents/new"
+          icon={<IconSend className="h-7 w-7" />}
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {intents.map((i) => (
             <li key={i.id}>
-              <Link
-                href={`/dashboard/intents/${i.id}`}
-                className="block rounded-lg border border-surface-border px-4 py-3 hover:bg-surface"
-              >
-                <span className="text-sm text-white capitalize">{i.status}</span>
-                <span className="text-xs text-slate-500 ml-2 font-mono">
-                  {i.id.slice(0, 8)}…
-                </span>
+              <Link href={`/dashboard/intents/${i.id}`}>
+                <Card className="transition-transform hover:-translate-y-0.5">
+                  <CardBody className="flex items-center justify-between gap-4 py-4">
+                    <div>
+                      <Badge tone={i.status === "executed" ? "active" : "pending"}>{i.status}</Badge>
+                      <p className="mt-2 font-mono text-xs text-slate-500">{i.id.slice(0, 12)}…</p>
+                    </div>
+                    <span className="text-sm font-medium text-brand-300">View →</span>
+                  </CardBody>
+                </Card>
               </Link>
             </li>
           ))}

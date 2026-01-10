@@ -1,6 +1,8 @@
 "use client";
 
 import { Component, type ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardBody } from "@/components/ui/card";
 
 export class ErrorBoundary extends Component<
   { children: ReactNode },
@@ -15,18 +17,18 @@ export class ErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-12 text-center">
-          <h1 className="text-lg text-white mb-2">Something went wrong</h1>
-          <p className="text-sm text-slate-400 mb-4">
-            Try refreshing the page. If the problem persists, contact support.
-          </p>
-          <button
-            type="button"
-            className="rounded-md bg-accent px-4 py-2 text-sm text-white"
-            onClick={() => this.setState({ hasError: false })}
-          >
-            Try again
-          </button>
+        <div className="flex min-h-[50vh] items-center justify-center p-8">
+          <Card className="max-w-md text-center">
+            <CardBody className="space-y-4 py-10">
+              <h1 className="font-display text-lg font-semibold text-white">Something went wrong</h1>
+              <p className="text-sm text-slate-400">
+                Try refreshing the page. If the problem persists, contact support.
+              </p>
+              <Button type="button" onClick={() => this.setState({ hasError: false })}>
+                Try again
+              </Button>
+            </CardBody>
+          </Card>
         </div>
       );
     }

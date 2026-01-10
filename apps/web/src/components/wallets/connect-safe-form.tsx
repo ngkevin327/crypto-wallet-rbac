@@ -5,7 +5,10 @@ import { listOrgs } from "@/lib/api/orgs";
 import { startWalletConnect, verifyWalletConnect } from "@/lib/api/wallets";
 import { ApiClientError } from "@/lib/api-client";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+
 interface Props {
   token: string;
   onConnected: () => void;
@@ -18,9 +21,6 @@ declare global {
     };
   }
 }
-
-const selectClass =
-  "w-full rounded-xl border border-surface-border bg-surface-raised/60 px-4 py-2.5 text-sm text-white focus:border-brand-500/60 focus:ring-2 focus:ring-brand-500/20 focus:outline-none";
 
 export function ConnectSafeForm({ token, onConnected }: Props) {
   const [address, setAddress] = useState("");
@@ -46,13 +46,7 @@ export function ConnectSafeForm({ token, onConnected }: Props) {
         return;
       }
       const orgId = orgs[0].id;
-      const res = await startWalletConnect(
-        token,
-        orgId,
-        address,
-        Number(chainId),
-        nickname || undefined
-      );
+      const res = await startWalletConnect(token, orgId, address, Number(chainId), nickname || undefined);
       setChallenge({ challengeId: res.challengeId, message: res.message, orgId });
       setStep("sign");
     } catch (err) {
@@ -95,11 +89,7 @@ export function ConnectSafeForm({ token, onConnected }: Props) {
         <pre className="max-h-32 overflow-auto rounded-xl border border-surface-border bg-surface p-4 text-xs text-slate-300">
           {challenge.message}
         </pre>
-        {error && (
-          <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-            {error}
-          </p>
-        )}
+        {error && <Alert variant="error">{error}</Alert>}
         <Button type="button" onClick={signWithWallet} disabled={loading}>
           {loading ? "Signing…" : "Sign with wallet"}
         </Button>
@@ -117,24 +107,17 @@ export function ConnectSafeForm({ token, onConnected }: Props) {
         className="font-mono"
         required
       />
-      <div className="space-y-1.5">
-        <label className="block text-sm font-medium text-slate-300">Network</label>
-        <select value={chainId} onChange={(e) => setChainId(e.target.value)} className={selectClass}>
-          <option value="11155111">Sepolia (testnet)</option>
-          <option value="1">Ethereum Mainnet</option>
-        </select>
-      </div>
+      <Select label="Network" value={chainId} onChange={(e) => setChainId(e.target.value)}>
+        <option value="11155111">Sepolia (testnet)</option>
+        <option value="1">Ethereum Mainnet</option>
+      </Select>
       <Input
         label="Nickname (optional)"
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         placeholder="Treasury Safe"
       />
-      {error && (
-        <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <Alert variant="error">{error}</Alert>}
       <Button type="submit" disabled={loading}>
         {loading ? "Validating…" : "Continue to signature"}
       </Button>

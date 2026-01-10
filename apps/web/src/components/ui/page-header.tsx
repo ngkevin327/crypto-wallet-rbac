@@ -2,6 +2,13 @@ import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { Button } from "./button";
 
+export type PageHeaderAction = {
+  label: string;
+  href?: string;
+  onClick?: () => void;
+  variant?: "primary" | "secondary" | "ghost" | "danger";
+};
+
 export function PageHeader({
   title,
   description,
@@ -10,7 +17,7 @@ export function PageHeader({
 }: {
   title: string;
   description?: string;
-  actions?: Array<{ label: string; href: string; variant?: "primary" | "secondary" }>;
+  actions?: PageHeaderAction[];
   className?: string;
 }) {
   return (
@@ -21,13 +28,24 @@ export function PageHeader({
       </div>
       {actions && actions.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {actions.map((action) => (
-            <Link key={action.href} href={action.href}>
-              <Button variant={action.variant ?? "primary"} size="md">
+          {actions.map((action) =>
+            action.href ? (
+              <Link key={action.label} href={action.href}>
+                <Button variant={action.variant ?? "primary"} size="md">
+                  {action.label}
+                </Button>
+              </Link>
+            ) : (
+              <Button
+                key={action.label}
+                variant={action.variant ?? "primary"}
+                size="md"
+                onClick={action.onClick}
+              >
                 {action.label}
               </Button>
-            </Link>
-          ))}
+            )
+          )}
         </div>
       )}
     </div>

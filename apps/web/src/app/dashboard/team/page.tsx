@@ -5,6 +5,8 @@ import { createOrg, deactivateMember, listMembers, listOrgs } from "@/lib/api/or
 import { InviteMemberModal } from "@/components/team/invite-member-modal";
 import { MemberDrawer } from "@/components/team/member-drawer";
 import { MemberTable } from "@/components/team/member-table";
+import { PageHeader } from "@/components/ui/page-header";
+import { LoadingState } from "@/components/ui/loading";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function TeamPage() {
@@ -42,24 +44,16 @@ export default function TeamPage() {
   }
 
   if (loading) {
-    return <p className="text-slate-400">Loading team…</p>;
+    return <LoadingState message="Loading team…" />;
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Team</h1>
-          <p className="text-slate-400 text-sm mt-1">Manage members and platform roles</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowInvite(true)}
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white"
-        >
-          Invite member
-        </button>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title="Team"
+        description="Invite colleagues, assign treasury roles, and manage platform access."
+        actions={[{ label: "Invite member", onClick: () => setShowInvite(true) }]}
+      />
 
       <MemberTable
         members={members}

@@ -6,6 +6,12 @@ import { evaluatePolicy } from "@/lib/api/policies";
 import { createIntent } from "@/lib/api/intents";
 import { useAuth } from "@/providers/auth-provider";
 import { PolicyPreviewBadge } from "./policy-preview-badge";
+import { WizardSteps } from "@/components/ui/wizard-steps";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { Card, CardBody } from "@/components/ui/card";
 
 const STEPS = ["Wallet", "Recipient", "Amount", "Review"] as const;
 
@@ -66,105 +72,79 @@ export function CreateIntentWizard({
   }
 
   return (
-    <div className="max-w-lg space-y-6">
-      <div className="flex gap-2 text-xs text-slate-500">
-        {STEPS.map((label, i) => (
-          <span key={label} className={i === step ? "text-accent" : ""}>
-            {i + 1}. {label}
-          </span>
-        ))}
-      </div>
+    <div className="space-y-6">
+      <WizardSteps steps={STEPS} current={step} />
 
       {step === 0 && (
-        <div className="space-y-2">
-          <label className="text-sm text-slate-400">Treasury wallet</label>
-          <select
-            className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm"
-            value={walletId}
-            onChange={(e) => setWalletId(e.target.value)}
-          >
-            <option value="">Select wallet</option>
-            {wallets.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.nickname ?? w.address.slice(0, 10)}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Select label="Treasury wallet" value={walletId} onChange={(e) => setWalletId(e.target.value)}>
+          <option value="">Select wallet</option>
+          {wallets.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.nickname ?? w.address.slice(0, 10)}
+            </option>
+          ))}
+        </Select>
       )}
 
       {step === 1 && (
-        <div className="space-y-2">
-          <label className="text-sm text-slate-400">Recipient address</label>
-          <input
-            className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm font-mono"
-            placeholder="0x…"
-            value={toAddress}
-            onChange={(e) => setToAddress(e.target.value)}
-          />
-        </div>
+        <Input
+          label="Recipient address"
+          className="font-mono"
+          placeholder="0x…"
+          value={toAddress}
+          onChange={(e) => setToAddress(e.target.value)}
+        />
       )}
 
       {step === 2 && (
-        <div className="space-y-2">
-          <label className="text-sm text-slate-400">Amount (USDC)</label>
-          <input
-            type="number"
-            className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm"
-            value={amountUsd}
-            onChange={(e) => setAmountUsd(e.target.value)}
-          />
-        </div>
+        <Input
+          label="Amount (USDC)"
+          type="number"
+          value={amountUsd}
+          onChange={(e) => setAmountUsd(e.target.value)}
+        />
       )}
 
       {step === 3 && (
-        <div className="space-y-4 rounded-lg border border-surface-border p-4">
-          <p className="text-sm text-slate-300">Review transfer</p>
-          <p className="text-xs text-slate-500 font-mono">{toAddress}</p>
-          <p className="text-lg text-white">${amountUsd} USDC</p>
-          <PolicyPreviewBadge decision={preview?.decision} reasons={preview?.reasons} />
-        </div>
+        <Card>
+          <CardBody className="space-y-3">
+            <p className="text-sm font-medium text-slate-300">Review transfer</p>
+            <p className="font-mono text-xs text-slate-500">{toAddress}</p>
+            <p className="font-display text-2xl font-semibold text-white">${amountUsd} USDC</p>
+            <PolicyPreviewBadge decision={preview?.decision} reasons={preview?.reasons} />
+          </CardBody>
+        </Card>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <Alert variant="error">{error}</Alert>}
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {step > 0 && (
-          <button
-            type="button"
-            className="rounded-md px-4 py-2 text-sm text-slate-400 hover:text-white"
-            onClick={() => setStep((s) => s - 1)}
-          >
+          <Button type="button" variant="ghost" onClick={() => setStep((s) => s - 1)}>
             Back
-          </button>
+          </Button>
         )}
         {step < 3 && (
-          <button
+          <Button
             type="button"
-            className="rounded-md bg-accent px-4 py-2 text-sm text-white"
             onClick={() => setStep((s) => s + 1)}
             disabled={step === 0 && !walletId}
           >
             Next
-          </button>
+          </Button>
         )}
         {step === 3 && (
           <>
-            <button
-              type="button"
-              className="rounded-md border border-surface-border px-4 py-2 text-sm"
-              onClick={() => void runPreview()}
-            >
+            <Button type="button" variant="secondary" onClick={() => void runPreview()}>
               Preview policy
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="rounded-md bg-accent px-4 py-2 text-sm text-white disabled:opacity-50"
               disabled={loading || preview?.decision === "DENY"}
               onClick={() => void submit()}
             >
               {loading ? "Creating…" : "Create intent"}
-            </button>
+            </Button>
           </>
         )}
       </div>

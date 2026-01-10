@@ -1,5 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { Modal } from "@/components/ui/modal";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+
 export function ConfirmApprovalModal({
   open,
   decision,
@@ -11,41 +16,37 @@ export function ConfirmApprovalModal({
   onConfirm: (note?: string) => void;
   onCancel: () => void;
 }) {
-  if (!open) return null;
+  const [note, setNote] = useState("");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" role="dialog" aria-modal="true">
-      <div className="w-full max-w-md rounded-lg border border-surface-border bg-surface-raised p-6 space-y-4">
-        <h2 className="text-lg text-white capitalize">Confirm {decision}</h2>
-        <p className="text-sm text-slate-400">
-          This action cannot be undone. Add an optional note for the audit log.
-        </p>
-        <textarea
-          id="approval-note"
-          className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm"
-          placeholder="Optional note"
-          rows={2}
-        />
-        <div className="flex justify-end gap-2">
-          <button type="button" className="text-sm text-slate-400" onClick={onCancel}>
+    <Modal
+      open={open}
+      title={`Confirm ${decision}`}
+      description="This action cannot be undone. Add an optional note for the audit log."
+      onClose={onCancel}
+      footer={
+        <>
+          <Button type="button" variant="ghost" onClick={onCancel}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={`rounded-md px-4 py-2 text-sm text-white ${
-              decision === "approved" ? "bg-emerald-600" : "bg-red-600"
-            }`}
-            onClick={() => {
-              const note = (
-                document.getElementById("approval-note") as HTMLTextAreaElement | null
-              )?.value;
-              onConfirm(note || undefined);
-            }}
+            variant={decision === "approved" ? "primary" : "danger"}
+            className={decision === "approved" ? "bg-emerald-600 hover:bg-emerald-500" : undefined}
+            onClick={() => onConfirm(note || undefined)}
           >
             Confirm
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </>
+      }
+    >
+      <Textarea
+        id="approval-note"
+        placeholder="Optional note"
+        rows={2}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+      />
+    </Modal>
   );
 }

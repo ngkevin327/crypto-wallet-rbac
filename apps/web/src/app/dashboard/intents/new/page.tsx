@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { apiRequest } from "@/lib/api-client";
 import { CreateIntentWizard } from "@/components/intents/create-intent-wizard";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody } from "@/components/ui/card";
+import { LoadingState } from "@/components/ui/loading";
 
 interface WalletRow {
   id: string;
@@ -35,13 +38,20 @@ export default function NewIntentPage() {
   }, [token, user?.id]);
 
   if (!orgId || !memberId) {
-    return <p className="text-slate-400">Loading…</p>;
+    return <LoadingState />;
   }
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold text-white mb-6">New USDC transfer</h1>
-      <CreateIntentWizard orgId={orgId} memberId={memberId} wallets={wallets} />
+    <div className="space-y-8">
+      <PageHeader
+        title="New USDC transfer"
+        description="Draft a payout intent and preview policy before submission."
+      />
+      <Card glow className="max-w-2xl">
+        <CardBody>
+          <CreateIntentWizard orgId={orgId} memberId={memberId} wallets={wallets} />
+        </CardBody>
+      </Card>
     </div>
   );
 }

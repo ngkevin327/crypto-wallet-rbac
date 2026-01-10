@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
+import { Card, CardBody } from "@/components/ui/card";
 export function TemporaryAccessFields({
   enabled,
   startsAt,
@@ -18,43 +20,40 @@ export function TemporaryAccessFields({
   };
 
   return (
-    <div className="space-y-3 rounded-md border border-surface-border p-3">
-      <label className="flex items-center gap-2 text-sm text-slate-300">
-        <input
-          type="checkbox"
-          checked={enabled}
-          onChange={(e) =>
-            onChange({
-              enabled: e.target.checked,
-              startsAt: startsAt || new Date().toISOString().slice(0, 16),
-              endsAt: endsAt || defaultEnd(),
-            })
-          }
-        />
-        Temporary access
-      </label>
-      {enabled && (
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs text-slate-500">Starts</label>
-            <input
+    <Card>
+      <CardBody className="space-y-3 py-4">
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-300">
+          <input
+            type="checkbox"
+            checked={enabled}
+            className="rounded border-surface-border text-brand-500 focus:ring-brand-500/30"
+            onChange={(e) =>
+              onChange({
+                enabled: e.target.checked,
+                startsAt: startsAt || new Date().toISOString().slice(0, 16),
+                endsAt: endsAt || defaultEnd(),
+              })
+            }
+          />
+          Temporary access
+        </label>
+        {enabled && (
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Starts"
               type="datetime-local"
-              className="w-full rounded-md border border-surface-border bg-surface px-2 py-1 text-sm"
               value={startsAt}
               onChange={(e) => onChange({ enabled, startsAt: e.target.value, endsAt })}
             />
-          </div>
-          <div>
-            <label className="text-xs text-slate-500">Ends</label>
-            <input
+            <Input
+              label="Ends"
               type="datetime-local"
-              className="w-full rounded-md border border-surface-border bg-surface px-2 py-1 text-sm"
               value={endsAt}
               onChange={(e) => onChange({ enabled, startsAt, endsAt: e.target.value })}
             />
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </CardBody>
+    </Card>
   );
 }

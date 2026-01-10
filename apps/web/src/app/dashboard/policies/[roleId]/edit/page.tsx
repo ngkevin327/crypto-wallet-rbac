@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { listOrgs } from "@/lib/api/orgs";
 import { createPolicy, listPolicies } from "@/lib/api/policies";
 import { PolicyForm } from "@/components/policies/policy-form";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody } from "@/components/ui/card";
 import { useAuth } from "@/providers/auth-provider";
 import type { PolicyRule } from "@wtp/shared/policy/rule-types";
 
@@ -35,9 +37,16 @@ export default function EditPolicyPage() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold text-white mb-6">Edit role policy</h1>
-      <PolicyForm onSubmit={handleSubmit} />
+    <div className="space-y-8 max-w-2xl">
+      <PageHeader
+        title="Edit role policy"
+        description="Configure spending limits, token allowlists, and approval thresholds."
+      />
+      <Card glow>
+        <CardBody>
+          <PolicyForm onSubmit={handleSubmit} />
+        </CardBody>
+      </Card>
     </div>
   );
 }

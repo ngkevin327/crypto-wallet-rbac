@@ -6,6 +6,11 @@ import { apiRequest } from "@/lib/api-client";
 import { listRoles } from "@/lib/api/policies";
 import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyRecord } from "@/lib/api/api-keys";
 import { CreateApiKeyModal } from "@/components/settings/create-api-key-modal";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card, CardBody } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/ui/loading";
+import { Badge } from "@/components/ui/badge";
 
 export default function ApiKeysSettingsPage() {
   const { token } = useAuth();
@@ -32,51 +37,52 @@ export default function ApiKeysSettingsPage() {
     })();
   }, [token]);
 
-  if (!orgId) return <p className="text-slate-400">Loading…</p>;
+  if (!orgId) return <LoadingState />;
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-white">API keys</h1>
-        <button
-          type="button"
-          className="rounded-md bg-accent px-4 py-2 text-sm text-white"
-          onClick={() => setModalOpen(true)}
-        >
-          Create key
-        </button>
-      </div>
-      <ul className="space-y-2">
+    <div className="space-y-8 max-w-2xl">
+      <PageHeader
+        title="API keys"
+        description="Machine access scoped to a role policy for bots and integrations."
+        actions={[{ label: "Create key", onClick: () => setModalOpen(true) }]}
+      />
+
+      <ul className="space-y-3">
         {keys.map((k) => (
-          <li
-            key={k.id}
-            className="flex justify-between items-center rounded-lg border border-surface-border px-4 py-3"
-          >
-            <div>
-              <p className="text-sm text-white">{k.name}</p>
-              <p className="text-xs font-mono text-slate-500">{k.keyPrefix}…</p>
-              {k.lastUsedAt && (
-                <p className="text-xs text-slate-600">
-                  Last used {new Date(k.lastUsedAt).toLocaleString()}
-                </p>
-              )}
-            </div>
-            {!k.revokedAt && (
-              <button
-                type="button"
-                className="text-xs text-red-400"
-                onClick={async () => {
-                  if (!token) return;
-                  await revokeApiKey(token, orgId, k.id);
-                  await refresh();
-                }}
-              >
-                Revoke
-              </button>
-            )}
-          </li>
+          <Card key={k.id}>
+            <CardBody className="flex items-center justify-between gap-4 py-4">
+              <div>
+                <p className="font-medium text-white">{k.name}</p>
+                <p className="mt-1 font-mono text-xs text-slate-500">{k.keyPrefix}…</p>
+                {k.lastUsedAt && (
+                  <p className="mt-1 text-xs text-slate-500">
+                    Last used {new Date(k.lastUsedAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {k.revokedAt ? (
+                  <Badge tone="deactivated">Revoked</Badge>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={async () => {
+                      if (!token) return;
+                      await revokeApiKey(token, orgId, k.id);
+                      await refresh();
+                    }}
+                  >
+                    Revoke
+                  </Button>
+                )}
+              </div>
+            </CardBody>
+          </Card>
         ))}
       </ul>
+
       <CreateApiKeyModal
         open={modalOpen}
         roles={roles}

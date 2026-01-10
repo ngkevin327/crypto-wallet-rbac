@@ -2,6 +2,8 @@
 
 import type { IntentRecord } from "@/lib/api/intents";
 import { explorerTxUrl } from "@/lib/safe/confirm-transaction";
+import { cn } from "@/lib/cn";
+import { TextLink } from "@/components/ui/link";
 
 const STEPS = [
   { key: "created", label: "Created" },
@@ -31,15 +33,16 @@ export function IntentStatusTimeline({ intent }: { intent: IntentRecord }) {
       {STEPS.map((step, i) => (
         <li key={step.key} className="relative">
           <span
-            className={`absolute -left-[21px] h-2.5 w-2.5 rounded-full ${
-              i <= active ? "bg-accent" : "bg-slate-600"
-            }`}
+            className={cn(
+              "absolute -left-[21px] h-2.5 w-2.5 rounded-full",
+              i <= active ? "bg-brand-500 ring-2 ring-brand-500/30" : "bg-slate-600"
+            )}
           />
-          <p className={`text-sm ${i <= active ? "text-white" : "text-slate-500"}`}>
+          <p className={cn("text-sm", i <= active ? "text-white" : "text-slate-500")}>
             {step.label}
           </p>
           {step.key === "policy" && decision.decision === "DENY" && (
-            <p className="text-xs text-red-400 mt-1">
+            <p className="mt-1 text-xs text-red-400">
               {(decision.reasons ?? []).join(", ")}
             </p>
           )}
@@ -47,14 +50,9 @@ export function IntentStatusTimeline({ intent }: { intent: IntentRecord }) {
       ))}
       {intent.txHash && (
         <li>
-          <a
-            href={explorerTxUrl(intent.chainId, intent.txHash)}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-accent hover:underline"
-          >
-            View on explorer
-          </a>
+          <TextLink href={explorerTxUrl(intent.chainId, intent.txHash)} className="text-xs">
+            View on explorer →
+          </TextLink>
         </li>
       )}
     </ol>

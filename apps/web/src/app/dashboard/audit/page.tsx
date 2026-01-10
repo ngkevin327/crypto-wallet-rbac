@@ -7,6 +7,10 @@ import { useAuditEvents } from "@/hooks/use-audit-events";
 import { AuditFilters } from "@/components/audit/audit-filters";
 import { AuditLogTable } from "@/components/audit/audit-log-table";
 import { startAuditExport } from "@/lib/api/audit";
+import { PageHeader } from "@/components/ui/page-header";
+import { Alert } from "@/components/ui/alert";
+import { LoadingState } from "@/components/ui/loading";
+import { Card, CardBody } from "@/components/ui/card";
 
 export default function AuditPage() {
   const { token } = useAuth();
@@ -36,29 +40,26 @@ export default function AuditPage() {
   }
 
   if (!orgId) {
-    return <p className="text-slate-400">Loading…</p>;
+    return <LoadingState />;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Audit log</h1>
-        <button
-          type="button"
-          onClick={() => void handleExport()}
-          className="rounded-md border border-surface-border px-4 py-2 text-sm text-slate-200 hover:bg-surface"
-        >
-          Export CSV
-        </button>
-      </div>
-      <AuditFilters {...filters} onChange={setFilters} />
-      {exportMsg && <p className="text-sm text-slate-400">{exportMsg}</p>}
-      <AuditLogTable
-        items={items}
-        loading={loading}
-        onLoadMore={loadMore}
-        hasMore={hasMore}
+    <div className="space-y-8">
+      <PageHeader
+        title="Audit log"
+        description="Immutable record of policy changes, approvals, and signing events."
+        actions={[{ label: "Export CSV", onClick: () => void handleExport(), variant: "secondary" }]}
       />
+
+      <Card>
+        <CardBody>
+          <AuditFilters {...filters} onChange={setFilters} />
+        </CardBody>
+      </Card>
+
+      {exportMsg && <Alert variant="info">{exportMsg}</Alert>}
+
+      <AuditLogTable items={items} loading={loading} onLoadMore={loadMore} hasMore={hasMore} />
     </div>
   );
 }

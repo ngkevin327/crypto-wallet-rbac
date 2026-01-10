@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { proposeIntent } from "@/lib/api/intents";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 export function SignTransactionButton({
   token,
@@ -36,7 +37,7 @@ export function SignTransactionButton({
       <Button type="button" onClick={() => void handleSign()} disabled={loading} size="md">
         {loading ? "Proposing…" : "Sign with wallet"}
       </Button>
-      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      {error && <Alert variant="error" className="mt-2">{error}</Alert>}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { RoleRecord } from "@/lib/api/policies";
 import { assignRole } from "@/lib/api/members";
 import { TemporaryAccessFields } from "./temporary-access-fields";
+import { Select } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   token: string;
@@ -34,30 +36,21 @@ export function RoleAssignmentForm({ token, orgId, memberId, roles, onAssigned }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <TemporaryAccessFields {...temp} onChange={setTemp} />
-      <div className="flex gap-2 items-end">
-      <div className="flex-1">
-        <label className="block text-xs text-slate-500 mb-1">Assign role</label>
-        <select
-          value={roleId}
-          onChange={(e) => setRoleId(e.target.value)}
-          className="w-full rounded-md border border-surface-border bg-surface px-2 py-1.5 text-sm"
-        >
-          {roles.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-md bg-accent px-3 py-1.5 text-sm text-white disabled:opacity-50"
-      >
-        Assign
-      </button>
+      <div className="flex items-end gap-2">
+        <div className="flex-1">
+          <Select label="Assign role" value={roleId} onChange={(e) => setRoleId(e.target.value)}>
+            {roles.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Assigning…" : "Assign"}
+        </Button>
       </div>
     </form>
   );

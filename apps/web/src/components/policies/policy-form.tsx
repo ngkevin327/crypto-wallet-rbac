@@ -4,6 +4,9 @@ import { useState } from "react";
 import type { PolicyRule } from "@wtp/shared/policy/rule-types";
 import { SpendingLimitFields } from "./rule-fields/spending-limit-fields";
 import { TokenAllowlistField } from "./rule-fields/token-allowlist-field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 interface Props {
   initialRules?: PolicyRule[];
@@ -56,7 +59,7 @@ export function PolicyForm({ initialRules: _initialRules, onSubmit }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-xl" data-testid="policy-form">
+    <form onSubmit={handleSubmit} className="max-w-xl space-y-6" data-testid="policy-form">
       <TokenAllowlistField value={tokenAddress} onChange={setTokenAddress} />
       <SpendingLimitFields
         dailyLimit={dailyLimit}
@@ -64,26 +67,18 @@ export function PolicyForm({ initialRules: _initialRules, onSubmit }: Props) {
         onDailyChange={setDailyLimit}
         onPerTxChange={setPerTxLimit}
       />
-      <div>
-        <label className="block text-sm text-slate-300 mb-1">Required approvers</label>
-        <input
-          data-testid="policy-approver-count"
-          type="number"
-          min={0}
-          value={approverCount}
-          onChange={(e) => setApproverCount(e.target.value)}
-          className="w-full rounded-md border border-surface-border bg-surface px-3 py-2 text-sm"
-        />
-      </div>
-      {error && <p className="text-sm text-red-400">{error}</p>}
-      <button
-        type="submit"
-        data-testid="policy-save"
-        disabled={saving}
-        className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-      >
+      <Input
+        label="Required approvers"
+        data-testid="policy-approver-count"
+        type="number"
+        min={0}
+        value={approverCount}
+        onChange={(e) => setApproverCount(e.target.value)}
+      />
+      {error && <Alert variant="error">{error}</Alert>}
+      <Button type="submit" data-testid="policy-save" disabled={saving}>
         {saving ? "Saving…" : "Save policy"}
-      </button>
+      </Button>
     </form>
   );
 }

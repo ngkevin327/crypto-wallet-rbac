@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { decideApproval } from "@/lib/api/approvals";
 import { ConfirmApprovalModal } from "./confirm-approval-modal";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 
 export function ApprovalActions({
   token,
@@ -30,26 +32,26 @@ export function ApprovalActions({
   }
 
   return (
-    <div className="flex gap-2">
-      <button
+    <div className="flex flex-wrap items-center gap-2">
+      <Button
         type="button"
         disabled={disabled}
         aria-label="Approve transfer intent"
-        className="rounded-md bg-emerald-700 px-3 py-2 text-sm text-white disabled:opacity-40"
+        className="bg-emerald-600 hover:bg-emerald-500"
         onClick={() => setModal("approved")}
       >
         Approve
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="danger"
         disabled={disabled}
         aria-label="Reject transfer intent"
-        className="rounded-md bg-red-800 px-3 py-2 text-sm text-white disabled:opacity-40"
         onClick={() => setModal("rejected")}
       >
         Reject
-      </button>
-      {error && <p className="text-xs text-red-400 w-full">{error}</p>}
+      </Button>
+      {error && <Alert variant="error" className="w-full">{error}</Alert>}
       <ConfirmApprovalModal
         open={modal !== null}
         decision={modal ?? "approved"}
