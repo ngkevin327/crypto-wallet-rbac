@@ -115,8 +115,6 @@ Expected result:
 - `PASS web`
 - `Local verification passed.`
 
-Validation output template and MVP gap matrix: `docs/local-mvp-validation-report.md`.
-
 ## Build and test
 
 ```bash
