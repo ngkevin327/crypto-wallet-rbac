@@ -43,18 +43,5 @@ coverage/
 apps/api/prisma/*.db
 apps/api/prisma/*.db-journal
 
-# Local git history rewrite tooling (not part of product)
-scripts/commit-date-map.txt
-scripts/filter-env.sh
-scripts/filter-msg.sh
-scripts/rewrite-commit-history.ps1
-scripts/run-filter-branch.sh
-
-# Planning artifacts (not part of this repository)
-/1.txt
-/2.txt
-/docs/01-Product-Vision-Document.md
-/docs/02-Product-Requirements-Document.md
-/docs/03-Technical-Architecture-Addendum.md
-/docs/04-Supporting-Diagrams.md
-/docs/05-MVP-Implementation-Plan.md
+# Local scratch (non-product artifacts)
+temp/
