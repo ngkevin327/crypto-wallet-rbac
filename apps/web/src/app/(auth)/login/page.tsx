@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { login } from "@/lib/api/auth";
+import { setAccessToken } from "@/lib/auth-token";
 import { ApiClientError } from "@/lib/api-client";
 import { Card, CardBody } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ export default function LoginPage() {
         setError("MFA is required. Complete verification in a follow-up step.");
         return;
       }
-      localStorage.setItem("wtp_access_token", result.accessToken);
+      setAccessToken(result.accessToken);
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Login failed");

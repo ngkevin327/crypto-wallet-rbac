@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { fetchMe, logout as apiLogout } from "@/lib/api/auth";
+import { clearAccessToken, getAccessToken, setAccessToken } from "@/lib/auth-token";
 import type { MeResponse } from "@/lib/api/types";
 
 interface AuthContextValue {
@@ -22,15 +23,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const setToken = useCallback((value: string | null) => {
     if (value) {
-      localStorage.setItem("wtp_access_token", value);
+      setAccessToken(value);
     } else {
-      localStorage.removeItem("wtp_access_token");
+      clearAccessToken();
     }
     setTokenState(value);
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const stored = localStorage.getItem("wtp_access_token");
+    const stored = getAccessToken();
     if (!stored) {
       setUser(null);
       setTokenState(null);
@@ -41,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(me);
       setTokenState(stored);
     } catch {
-      localStorage.removeItem("wtp_access_token");
+      clearAccessToken();
       setUser(null);
       setTokenState(null);
     }
