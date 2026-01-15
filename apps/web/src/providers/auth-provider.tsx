@@ -55,9 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     try {
       await apiLogout();
+    } catch {
+      // Still clear local session if API logout fails (e.g. expired refresh cookie).
     } finally {
       setToken(null);
       setUser(null);
+      window.location.assign("/login");
     }
   }, [setToken]);
 
