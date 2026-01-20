@@ -5,7 +5,7 @@ import { queryAuditEvents, type AuditEventRow } from "@/lib/api/audit";
 
 export function useAuditEvents(
   token: string | null,
-  orgId: string,
+  orgId: string | null,
   filters: { eventType?: string; from?: string; to?: string }
 ) {
   const [items, setItems] = useState<AuditEventRow[]>([]);
@@ -14,7 +14,14 @@ export function useAuditEvents(
 
   const load = useCallback(
     async (append = false) => {
-      if (!token) return;
+      if (!token || !orgId) {
+        if (!append) {
+          setItems([]);
+          setCursor(null);
+        }
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const params: Record<string, string> = { limit: "50" };

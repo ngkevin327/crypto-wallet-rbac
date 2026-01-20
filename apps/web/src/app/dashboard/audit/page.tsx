@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
-import { apiRequest } from "@/lib/api-client";
+import { useActiveOrg } from "@/hooks/use-active-org";
 import { useAuditEvents } from "@/hooks/use-audit-events";
 import { AuditFilters } from "@/components/audit/audit-filters";
 import { AuditLogTable } from "@/components/audit/audit-log-table";
@@ -14,17 +14,10 @@ import { Card, CardBody } from "@/components/ui/card";
 
 export default function AuditPage() {
   const { token } = useAuth();
-  const [orgId, setOrgId] = useState("");
+  const { orgId, loading: orgLoading } = useActiveOrg(token);
   const [filters, setFilters] = useState({ eventType: "", from: "", to: "" });
   const { items, loading, loadMore, hasMore } = useAuditEvents(token, orgId, filters);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!token) return;
-    void apiRequest<{ id: string }[]>("/orgs", { token }).then((orgs) => {
-      setOrgId(orgs[0]?.id ?? "");
-    });
-  }, [token]);
 
   async function handleExport() {
     if (!token || !orgId) return;
@@ -39,8 +32,8 @@ export default function AuditPage() {
     }
   }
 
-  if (!orgId) {
-    return <LoadingState />;
+  if (orgLoading || !orgId) {
+    return <LoadingState message="Loading audit log…" />;
   }
 
   return (

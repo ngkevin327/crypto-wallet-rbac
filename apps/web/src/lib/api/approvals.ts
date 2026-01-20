@@ -17,6 +17,9 @@ export interface ApprovalRecord {
 }
 
 export function listApprovals(token: string, orgId: string, status = "pending") {
+  if (!orgId?.trim()) {
+    return Promise.resolve([]);
+  }
   return apiRequest<ApprovalRecord[]>(`/orgs/${orgId}/approvals?status=${status}`, { token });
 }
 

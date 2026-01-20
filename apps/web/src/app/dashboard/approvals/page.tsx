@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
-import { apiRequest } from "@/lib/api-client";
+import { useActiveOrg } from "@/hooks/use-active-org";
 import { useApprovals } from "@/hooks/use-approvals";
 import { ApprovalInboxTable } from "@/components/approvals/approval-inbox-table";
 import { ApprovalActions } from "@/components/approvals/approval-actions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { LoadingState } from "@/components/ui/loading";
 import { Tabs } from "@/components/ui/tabs";
 import { Card, CardBody } from "@/components/ui/card";
 import { IconCheckCircle } from "@/components/icons";
@@ -17,21 +18,19 @@ type Tab = "pending" | "fulfilled" | "rejected";
 
 export default function ApprovalsPage() {
   const { token } = useAuth();
-  const [orgId, setOrgId] = useState<string | null>(null);
+  const { orgId, loading: orgLoading } = useActiveOrg(token);
+
+  if (!token || orgLoading || !orgId) {
+    return <LoadingState message="Loading approvals…" />;
+  }
+
+  return <ApprovalsInbox token={token} orgId={orgId} />;
+}
+
+function ApprovalsInbox({ token, orgId }: { token: string; orgId: string }) {
   const [tab, setTab] = useState<Tab>("pending");
   const [selected, setSelected] = useState<ApprovalRecord | null>(null);
-  const { items, loading, refresh } = useApprovals(token, orgId ?? "", tab);
-
-  useEffect(() => {
-    if (!token) return;
-    void apiRequest<{ id: string }[]>("/orgs", { token }).then((orgs) => {
-      setOrgId(orgs[0]?.id ?? null);
-    });
-  }, [token]);
-
-  if (!orgId) {
-    return <p className="text-slate-400">Loading…</p>;
-  }
+  const { items, loading, refresh } = useApprovals(token, orgId, tab, true);
 
   return (
     <div className="space-y-8">
@@ -71,7 +70,7 @@ export default function ApprovalsPage() {
             <ApprovalInboxTable items={items} onSelect={setSelected} />
           )}
         </div>
-        {selected && tab === "pending" && token && (
+        {selected && tab === "pending" && (
           <Card className="h-fit lg:sticky lg:top-24">
             <CardBody className="space-y-4">
               <div>
