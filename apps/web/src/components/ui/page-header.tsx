@@ -23,7 +23,7 @@ export function PageHeader({
   return (
     <div className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}>
       <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight text-white">{title}</h1>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-white sm:text-[1.65rem]">{title}</h1>
         {description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">{description}</p>}
       </div>
       {actions && actions.length > 0 && (

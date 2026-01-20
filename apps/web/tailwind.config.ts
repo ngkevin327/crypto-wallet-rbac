@@ -34,7 +34,7 @@ const config: Config = {
       },
       backgroundImage: {
         "mesh-auth":
-          "radial-gradient(ellipse 80% 60% at 20% 20%, rgba(99,102,241,0.35), transparent), radial-gradient(ellipse 60% 50% at 80% 80%, rgba(56,189,248,0.2), transparent)",
+          "radial-gradient(ellipse 80% 55% at 20% 15%, rgba(99,102,241,0.22), transparent 55%), radial-gradient(ellipse 60% 50% at 75% 75%, rgba(56,189,248,0.14), transparent 50%), radial-gradient(ellipse 40% 35% at 50% 50%, rgba(67,56,202,0.08), transparent 70%)",
         "mesh-app":
           "radial-gradient(ellipse 100% 80% at 0% 0%, rgba(79,70,229,0.12), transparent 50%), radial-gradient(ellipse 80% 60% at 100% 0%, rgba(14,165,233,0.08), transparent 45%)",
       },
